@@ -1,0 +1,10 @@
+﻿kaggle : usage: kaggle [-h] [-v] [-W]
+At C:\Users\feika\AppData\Local\Temp\ps-script-be1cd492-c7b5-4c6c-b8b3-9f7a5c710d65.ps1:91 char:1
++ kaggle competitions pages pierce-the-veil --page-name Evaluation --fo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (usage: kaggle [-h] [-v] [-W]:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+              {competitions,c,datasets,d,kernels,k,models,m,files,f,benchmarks,b,config,auth}
+              ...
+kaggle: error: unrecognized arguments: --format json

@@ -1,0 +1,34 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.python-version
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+.DS_Store
+*.log
+
+# Internal helper, not part of the submission
+src/_inspect_competitor.py
+
+# Local terminal capture files (Cursor-internal)
+terminals/
+
+# Local copies of competitor notebooks (their copyright, not ours)
+research/notebooks/
+research/udit_dump.txt
+
+# Local one-off test logs
+self_test_v*.txt
+
+# Competition data --- redistribute via Kaggle, not this repo
+data/
+
+# Kaggle CLI execution logs and CSV outputs --- not part of the source
+kaggle_logs/
+kaggle_push/
+
+# Redundant submission.csv (regenerable from notebooks)
+notebook/submission.csv

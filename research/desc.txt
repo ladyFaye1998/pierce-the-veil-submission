@@ -1,0 +1,33 @@
+﻿name         content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+-----------  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  
+Description  ##The Scenario
+
+You are operating as an adversary who has breached an environment outside the trusted source boundary. You have intercepted data in transit, but you do not have access to:
+
+- the original raw inputs
+- the number or type of features
+- feature ordering or semantics
+- the encoding function or its parameters
+- any decoder or reconstruction mechanism
+- confirmation that an encoding process even exists
+
+All you have are the observed values.
+
+This setup reflects a real-world deployment pattern in privacy-preserving machine learning, where raw data never leaves the source environment, and only transformed representations are exposed. The goal is to determine whether those exposed representations leak enough information to reconstruct the original inputs.
+
+##The Challenge
+
+You must submit an algorithm, not a dataset.
+
+Your algorithm will be evaluated on a hidden test set of unseen values. It must ingest these values and output the original data records you believe correspond to them.
+
+To win, your method must:
+
+- infer the correct structure of the original data
+- reconstruct individual records (not just distributions)
+- generalize to unseen data
+- demonstrate clear dependence on the provided inputs
+
+##Why This Matters
+
+In many machine learning systems, reconstruction attacks are a known threat. Given sufficient informationÔÇösuch as gradients or model outputsÔÇöattackers can sometimes recover sensitive data. These attacks are fundamentally inverse problems, where one attempts to recover inputs from observable outputs.  

@@ -1,0 +1,11 @@
+﻿name                     
+-----------------------  
+data-description         
+Description              
+Submission Requirements  
+rules                    
+abstract                 
+foundational-rules       
+tracks-and-awards        
+Evaluation               
+judges                   

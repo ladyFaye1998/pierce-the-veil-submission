@@ -1,0 +1,190 @@
+﻿name                     content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+-----------------------  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  
+Submission Requirements  ## 1. Submission Format
+
+Participants must submit an **executable reconstruction algorithm**, not a dataset.
+
+Each submission must:
+
+- Be a Kaggle Notebook or script that runs end-to-end
+- Implement the required interface:
+
+```python
+def reconstruct(public_latents, hidden_latents, metadata=None):
+    """
+    Returns:
+        X_hat: np.ndarray of shape (N, D_hat)
+    """
+```
+
+- Include a clear methodology description within the notebook
+
+Failure to meet interface or execution requirements will result in automatic disqualification.
+
+---
+
+## 2. Execution Constraints
+
+All submissions must:
+
+- Run in the official evaluation environment
+- Execute without internet access
+- Complete within time and memory limits
+- Use only permitted libraries
+- Be deterministic (fixed random seed)
+
+Non-compliant submissions will not be evaluated.
+
+---
+
+## 3. Output Requirements
+
+The submission must return:
+
+X_hat Ôêê R^(N ├ù D_hat)
+
+Where:
+- N = number of samples
+- D_hat = inferred dimensionality
+
+Strict requirements:
+
+- Exact row count match
+- Exact dimensionality match (unknown to participants)
+- Numeric, finite outputs only
+- Row-wise alignment with input
+
+---
+
+## 4. Definition of Valid Reconstruction
+
+A submission qualifies as a **valid reconstruction** only if it satisfies ALL of the following:
+
+### 4.1 Structural Recovery
+- Correct dimensionality inferred
+- Consistent feature structure
+
+### 4.2 Record-Level Accuracy
+- Row-aligned reconstruction
+- Not distribution-level approximation
+
+### 4.3 Latent Dependence
+- Output must depend on input latents
+- Verified via perturbation testing
+
+### 4.4 Generalization
+- Must perform on multiple hidden datasets
+
+---
+
+## 5. Explicitly Disallowed Methods
+
+The following are prohibited:
+
+- Random guessing
+- Distribution matching without alignment
+- Constant or input-independent outputs
+- Hardcoding outputs
+- Exploiting platform or evaluation leaks
+- Using non-public or proprietary data
+
+Any violation results in disqualification.
+
+---
+
+## 6. External Data Policy
+
+Allowed:
+- Public datasets
+- Pretrained models
+- Published methods
+
+Requirements:
+- Must be disclosed
+- Must be legally usable
+
+Not allowed:
+- Private datasets
+- Hidden test leakage
+- Insider information
+
+---
+
+## 7. Reproducibility Requirement
+
+To qualify for prize consideration, submissions must:
+
+- Reproduce identical results when re-run
+- Execute without modification
+- Include all dependencies
+
+Non-reproducible submissions are disqualified.
+
+---
+
+## 8. Evaluation Pipeline
+
+Submissions will undergo:
+
+1. Execution validation
+2. Structural validation
+3. Reconstruction scoring
+4. Latent dependence testing
+5. Generalization testing
+6. Code audit
+
+Passing earlier stages does not guarantee advancement.
+
+---
+
+## 9. Prize Adjudication (Legally Binding)
+
+The Grand Prize will be awarded **only if** a submission:
+
+- Meets all reconstruction criteria
+- Passes all evaluation stages
+- Is reproducible
+- Passes code audit
+
+Integrated Quantum reserves the right to:
+
+- Request clarification or reruns
+- Validate against additional hidden datasets
+- Reject submissions that violate intent or rules
+
+All decisions are **final and binding**.
+
+---
+
+## 10. No-Winner Clause
+
+If no submission satisfies all criteria:
+
+**No Grand Prize will be awarded.**
+
+Partial success, statistical similarity, or approximate reconstruction does not qualify.
+
+---
+
+## 11. Anti-Cheating and Integrity Clause
+
+Any attempt to:
+
+- Exploit infrastructure
+- Extract hidden data
+- Reverse engineer evaluation systems
+
+will result in:
+
+- Immediate disqualification
+- Potential ban from the competition
+
+---
+
+## 12. Final Clarification
+
+This is not a prediction or generative task.
+
+This is an **inverse problem** requiring reconstruction of unknown inputs from limited observable data.
+
+Only genuine reconstruction methods are eligible for winning.  

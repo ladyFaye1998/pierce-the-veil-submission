@@ -1,0 +1,178 @@
+﻿name        content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+----------  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  
+Evaluation  ## Overview
+
+Submissions are evaluated as **reconstruction algorithms**, not predictions. Each submission is executed against hidden datasets and must reconstruct the original input data from the provided one-dimensional values.
+
+Evaluation is performed through a **multi-stage validation pipeline**. A submission must pass *all stages* to be considered for the Grand Prize.
+
+---
+
+## 1. Evaluation Framework
+
+Each submitted algorithm is run on a hidden dataset:
+
+Z Ôêê R^(N ├ù 1)
+
+and must produce a reconstruction:
+
+X_hat Ôêê R^(N ├ù D_hat)
+
+The true data X Ôêê R^(N ├ù D) is never exposed.
+
+---
+
+## 2. Evaluation Stages
+
+### Stage 1 ÔÇö Execution & Validity
+The submission must:
+- execute successfully
+- complete within resource limits
+- output valid numeric values (no NaN/Inf)
+Failure at this stage results in submission disqualification
+
+---
+
+### Stage 2 ÔÇö Structural Validation
+The output must satisfy:
+- Correct row count (N)
+- Correct dimensionality (D)
+Dimensionality is not disclosed to participants.
+Submissions with incorrect shape are rejected.
+
+---
+
+### Stage 3 ÔÇö Record Alignment
+Reconstruction must be row/record aligned:
+- Row i must correspond to input row i
+- Permuted outputs are not accepted
+This prevents distribution-level or generative solutions from qualifying.
+
+---
+
+### Stage 4 ÔÇö Reconstruction Accuracy
+For valid submissions, reconstruction error is computed using a standardized error metric:
+
+e_ij = |x_hat_ij - x_ij| / s_j
+
+where s_j is a robust scale estimate for feature j.
+
+Primary metric:
+
+SRMSE = sqrt( (1 / (N┬ÀD)) * sum(e_ij^2) )
+
+Additional constraints may include:
+- High percentile error thresholds
+- Feature-wise correlation checks
+- Row-level error consistency
+A submission must meet strict predefined thresholds to proceed.
+
+---
+
+### Stage 5 ÔÇö Baseline Separation
+To prevent random or trivial wins, submissions are compared against and must outperform naive baseline strategies:
+- Random guesses
+- Distribution matching
+- Constant outputs
+A valid solution must outperform these baselines by a statistically significant margin.
+
+---
+
+### Stage 6 ÔÇö Latent Dependence Verification
+Submissions must demonstrate that outputs depend on the provided inputs.
+
+This is tested by:
+- Permuting input rows
+- Evaluating output consistency under transformation
+
+Valid solutions must satisfy:
+
+f(PZ) Ôëê P f(Z)
+
+Submissions that ignore inputs or produce fixed outputs are disqualified.
+---
+
+### Stage 7 ÔÇö Generalization
+Top submissions are evaluated on additional hidden datasets not used during initial scoring.
+
+To qualify, performance must:
+- remain consistent across datasets
+- not degrade significantly
+
+This prevents overfitting to a single dataset.
+
+---
+
+### Stage 8 ÔÇö Code Review
+Finalist submissions undergo manual review to verify:
+- the method is legitimate
+- the method must not exploit Kaggle system behavior or other unintended signals
+- results are reproducible
+
+---
+
+## 3. Leaderboard Policy
+- During the competition, submissions receive limited or no scoring feedback
+- Final rankings are determined using private evaluation datasets
+
+This prevents iterative probing of the hidden data.
+
+---
+
+## 4. Winning Criteria
+
+To win the Full Reconstruction Challenge, a submission must:
+
+- Infer the correct dimensionality
+- Reconstruct individual records with high accuracy
+- Demonstrate dependence on the input data
+- Generalize to unseen datasets
+- Pass all validation and review stages
+
+---
+
+## 5. Independent Audit & Verification
+
+To ensure maximum credibility and transparency:
+
+- Finalist submissions may be reviewed by **independent third-party experts** or auditors.
+- The evaluation process, scoring methodology, and validation results may be **replicated independently** to confirm outcomes.
+- Additional hidden datasets may be introduced during audit to verify robustness.
+- Code and methodology must be sufficiently clear to allow **independent reproduction of results**.
+
+The purpose of independent verification is to ensure that:
+
+- Any winning solution represents a genuine reconstruction method  
+- No unintended evaluation artifacts or loopholes were exploited  
+- Results are robust, reproducible, and scientifically valid  
+
+Organizers reserve the right to **withhold the Grand Prize** if independent verification cannot confirm the validity of a submission.
+
+---
+
+## 6. Important Clarification
+
+This competition evaluates true reconstruction, not:
+
+approximate similarity
+statistical matching
+plausible synthetic data generation
+
+A submission that produces realistic-looking data but does not reconstruct the actual inputs will not qualify.
+
+---
+
+## 7. No-Winner Condition
+
+If no submission satisfies all evaluation criteria:
+
+**No Grand Prize will be awarded.**
+
+---
+
+## 8. Final Authority
+
+All decisions are **final and binding**, including:
+- Evaluation outcomes
+- Threshold determination
+- Prize eligibility  

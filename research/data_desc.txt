@@ -1,0 +1,95 @@
+﻿name              content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+----------------  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  
+data-description  This competition provides a dataset consisting of **observed scalar values** derived from an unknown data-generating process.
+
+### What You Are Given
+
+Participants are provided with:
+
+- A dataset of **4,096 rows**
+- Each row contains a **single numeric value**
+
+Formally, the dataset can be represented as:
+
+\[
+Z \in \mathbb{R}^{4096 \times 1}
+\]
+
+These values are the only data available to participants.
+
+---
+
+### What Is Not Provided
+
+To reflect the intended threat model, the following information is **intentionally withheld**:
+
+- The original input data  
+- The dimensionality of the original data  
+- Feature names, types, or semantics  
+- Feature ordering or structure  
+- The transformation process that produced the observed values  
+- Any model, parameters, or intermediate representations  
+- Any guarantees about invertibility or reconstruction feasibility  
+
+Participants should not assume access to any of the above.
+
+---
+
+### Nature of the Data
+
+The observed values:
+
+- Are **real-valued numerical quantities**
+- Are derived from an **unknown transformation applied to structured data**
+- May contain **nonlinear relationships and dependencies**
+- Are sufficient to support a downstream machine learning task (not provided)
+
+No assumptions should be made about:
+
+- the distribution of the original data  
+- the scale or normalization of features  
+- the presence of categorical, ordinal, or continuous variables  
+- the presence or absence of noise  
+
+---
+
+### Hidden Evaluation Data
+
+Submissions are evaluated against one or more **hidden datasets** that:
+
+- follow the same data-generating process  
+- are not accessible during development  
+- are used to test generalization and robustness  
+
+The true underlying data corresponding to these hidden datasets is also not accessible.
+
+---
+
+### Objective Context
+
+This dataset is designed to simulate a scenario in which:
+
+- data has been observed **outside of its original environment**  
+- only **transformed representations** are available  
+- the original inputs are **not directly accessible**  
+
+Participants are tasked with determining whether the original data can be reconstructed from these observations.
+
+---
+
+### Important Notes
+
+- The dataset **does not represent a traditional supervised learning problem**
+- There are **no labels or targets**
+- There is **no training/test split in the conventional sense**
+- The challenge is fundamentally an **inverse problem**, not a prediction task  
+
+---
+
+### Intended Interpretation
+
+Participants should treat the dataset as:
+
+> A collection of observations generated from an unknown system, with the goal of determining whether sufficient information exists to recover the original inputs.
+
+No additional assumptions should be made beyond what is explicitly stated.  
