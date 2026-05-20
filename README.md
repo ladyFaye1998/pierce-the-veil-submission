@@ -1,38 +1,49 @@
+<p align="center">
+  <img src="assets/banner.png" alt="Pierce the VEIL banner" width="100%"/>
+</p>
+
 # Pierce the VEIL — Hack It and Crack It Simulation
 
 End-to-end solution for the Kaggle competition
 [Pierce the VEIL](https://www.kaggle.com/competitions/pierce-the-veil) by
 Integrated Quantum Technologies. **Deadline: 2026-05-22 04:00 UTC.**
 
-**Live Kaggle kernels (Final Submissions):**
-- Primary (D=16): https://www.kaggle.com/code/ladyfaye/pierce-the-veil-master-submission-d16
-- Backup  (D=132): https://www.kaggle.com/code/ladyfaye/pierce-the-veil-backup-submission-d132
+**Final Submissions (live Kaggle kernels):**
+- Primary `D̂ = 16`: <https://www.kaggle.com/code/ladyfaye/pierce-the-veil-master-submission-d16>
+- Backup `D̂ = 132`: <https://www.kaggle.com/code/ladyfaye/pierce-the-veil-backup-submission-d132>
+
+**Standalone write-up:** [`WRITEUP.md`](WRITEUP.md) (mirrors the in-notebook argument for judges who prefer markdown).
 
 ## Strategy in one paragraph
 
 We treat the competition as statistical cryptanalysis on the
 *Vector-Encoded Information Layer* (VEIL) described in
-[arXiv:2603.15842](https://arxiv.org/abs/2603.15842) by the host. The
-paper proves (§9) and empirically demonstrates (§10.1) that the encoder
-is non-invertible even when the attacker has *paired* training data —
-which we do not. We focus on the three juried tracks ($2,000 combined)
-through a forensic encoder-identification analysis, a tight Cramér-Rao
-floor derivation, and a `reconstruct()` that implements **six calibrated
-leak channels** (linear, magnitude, sign, quadratic, rank-Gaussian
-quantile, GMM mixture-component) at α = 0.045 per channel, staying
-within +0.14 % / -0.23 % of the zeros baseline while showing measured
-positive expected SRMSE gain (mean 0.99975 over 20 surrogates, beats
-zeros 65 % of seeds) — also taking an opportunistic swing at the
-$8,000 Grand Prize on the off-chance any one channel hits a real signal.
-We ship two notebooks (`D̂ = 16` primary, `D̂ = 132` backup) to hedge
+[arXiv:2603.15842](https://arxiv.org/abs/2603.15842) by the competition
+host. The paper proves (§9) and empirically demonstrates (§10.1) that
+the encoder is non-invertible even when the attacker has *paired*
+training data — which competition participants do not. We focus on the
+three juried tracks ($2,000 combined) through a forensic
+encoder-identification analysis, a Cramér-Rao + Fano-inequality SRMSE
+floor derivation, and a `reconstruct()` that implements **six
+calibrated leak channels** (linear, magnitude, sign, quadratic,
+rank-Gaussian quantile, GMM mixture-component) at `α = 0.045` per
+channel, with analytic worst-case drift bounded to ±1.7 % from the
+zeros baseline (and empirically tighter — see Monte Carlo below).
+A 100-seed Monte Carlo on synthetic surrogates gives mean SRMSE
+`1.00015`, 95 % bootstrap CI `[0.99993, 1.00039]` — statistically
+indistinguishable from the zeros baseline, which is consistent with
+the host's own §10.1 result on a strictly-stronger attacker. We also
+ship two notebooks (`D̂ = 16` primary, `D̂ = 132` backup) to hedge
 the unknown true dimensionality.
 
 ## Repository layout
 
 ```
 Pierce the VEIL Hack It and Crack It Simulation/
+├── assets/
+│   └── banner.png                        # notebook + README banner
 ├── data/
-│   └── intercepted_data.csv             # the 4096×1 leaked Z
+│   └── intercepted_data.csv              # 4096×1 leaked Z (not redistributed)
 ├── src/
 │   ├── eda.py                            # 8-test forensic battery
 │   ├── eda_results.json                  # cached EDA output
@@ -42,76 +53,85 @@ Pierce the VEIL Hack It and Crack It Simulation/
 │   ├── reconstruct.py                    # primary algorithm (D=16)
 │   ├── reconstruct_d132.py               # backup algorithm (D=132)
 │   ├── self_tests.py                     # local 8-stage emulator
-│   └── make_figures.py                   # publication-grade plots
+│   ├── make_figures.py                   # publication-grade plots
+│   └── build_notebooks.py                # rebuild both notebooks from sources
 ├── notebook/
 │   ├── pierce-the-veil-master.ipynb              # PRIMARY submission
-│   ├── pierce-the-veil-master.executed.ipynb     # ←  reference run output
+│   ├── pierce-the-veil-master.executed.ipynb     # reference run output
 │   ├── pierce-the-veil-backup-d132.ipynb         # BACKUP submission
 │   └── pierce-the-veil-backup-d132.executed.ipynb
 ├── figures/                              # generated plots
-├── research/                             # competitor notebooks + scraped pages
+├── research/                             # scraped competition pages (notebooks in .gitignore)
+├── kaggle_push/                          # staging for kaggle CLI push (in .gitignore)
 ├── SUBMISSION_GUIDE.md                   # upload recipe
+├── WRITEUP.md                            # standalone judge-friendly writeup
+├── LICENSE                               # MIT (code) / Kaggle rules (submission)
 └── README.md                             # this file
 ```
 
 ## Reproduce locally
 
 ```powershell
-# 1. Forensic EDA
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+# Place intercepted_data.csv in data/
+
 python src\eda.py
-
-# 2. Synthetic-encoder Wasserstein-1 sweep (~3 min)
 python src\signature_match.py
-
-# 3. Per-feature SRMSE / theoretical floor analysis
 python src\surrogate_decoder.py
-
-# 4. Run the 8-stage local self-test on reconstruct()
 python src\self_tests.py
-
-# 5. Regenerate publication-grade figures
 python src\make_figures.py
+python src\build_notebooks.py
+jupyter nbconvert --to notebook --execute notebook\pierce-the-veil-master.ipynb
 ```
 
-## Reference local self-test output (D=16 primary)
+## Reference local self-test output (D = 16 primary)
 
 ```
-Stage 1  all_finite                : True
-Stage 2  shape                     : (4096, 16)
-Stage 3  row_aligned_under_perm    : True
-Stage 4  ours_srmse                : 1.0020 (single seed)
-         monte-carlo 20-seed mean  : 0.99975  (beats zeros 13/20)
-Stage 5  frac_random_beaten        : 1.00
-Stage 6  permutation_equivariant   : True
-Stage 6  n_nonzero_cols            : 6
-Stage 7  generalisation mean       : 1.0009 ± 0.0009
-Stage 8  imports_only_numpy        : True
-Determinism (5 runs, bit-equal)    : Δ = 0.0
+Stage 1  all_finite                       : True
+Stage 2  shape                            : (4096, 16)
+Stage 3  row_aligned_under_perm           : True
+Stage 4  ours_srmse                       : 1.0020 (single seed)
+         monte-carlo 100-seed mean        : 1.00015
+         monte-carlo 95% bootstrap CI     : [0.99993, 1.00039]
+         beats zeros baseline             : 49 / 100 seeds
+Stage 5  frac_random_baselines_beaten     : 1.00
+Stage 6  permutation_equivariant          : True
+Stage 6  n_nonzero_cols                   : 6
+Stage 7  generalisation std (100 seeds)    : < 0.001
+Stage 8  imports_only_numpy               : True
+Determinism (5 runs, bit-identical)       : Δ = 0.0
 ```
 
-## What makes this submission different from the field
+## What is distinctive about this submission
 
-We surveyed 27 publicly committed competitor notebooks. The dominant
-failure modes we avoid:
+We surveyed 27 publicly committed competitor notebooks. What we add to
+the field that the rest does not jointly cover:
 
-1. **`D̂` guessing without evidence.** Most notebooks pick `D̂` arbitrarily
-   (1, 4, 10, 20, 132...). Ours has 480 cells of explicit synthetic
-   fingerprinting behind the choice.
-2. **Over-engineering the signal.** Several entries (e.g. Udit's D=132
-   stack of 132 tanh/Fourier features) fill every column with
-   variance ~0.5 features, guaranteeing per-col SRMSE ~1.1 on
-   uncorrelated columns and so failing Stage 5. Ours uses 6 calibrated
-   channels with bounded α = 0.045 — large enough to leak documented
-   signal, small enough that worst-case drift stays under ±1.7 %.
-3. **Pretending Grand Prize is winnable.** The host's own paper rules
-   it out under the §10.1 threat model. We say so plainly, *and* take
-   an opportunistic swing via six independent leak channels.
-4. **Skipping the compliance checklist.** Our `reconstruct()` is
-   verified deterministic (`Δ = 0.0` across 5 runs), permutation
-   equivariant (`atol = 1e-12`), and internet-free.
+1. **480-cell empirical W₁ signature sweep** behind `D̂ = 16`. None of
+   the surveyed notebooks documents an equivalent sweep.
+2. **Six-channel calibrated leak stack** combining linear, magnitude,
+   sign, quadratic, rank-Gaussian quantile, and GMM mixture-component
+   leaks in a bounded-`α` framework. Gowthaman covers four of these;
+   no other notebook combines all six.
+3. **Cramér-Rao + Fano-inequality SRMSE floor** with measured `H(X|Z)
+   ≈ 3.05` bits. No other notebook combines both floors.
+4. **Three-pronged impossibility argument** (topology + Fano + host's
+   own §10.1 empirics). Udit covers two prongs; merkiraz covers two.
+5. **Local 8-stage emulator** and 100-seed Monte Carlo characterisation
+   of the SRMSE distribution.
+6. **Dual `D̂` hedge** (`D = 16` primary + `D = 132` backup) as Final
+   Submissions.
+7. **Compliance posture**: internet off in metadata, numpy-only
+   imports, no `random` calls, bit-identical determinism across 5 runs.
+
+Where others have advantages we did not match: Udit Jain has the
+cleanest primary-source citation work; Ashok Pukkalla has richer EDA
+figures; Amin has a broader algorithmic menu.
 
 ## License
 
-Code is MIT-licensed for non-winning use. By Kaggle competition rules,
-winning submissions grant the Competition Sponsor a non-exclusive,
-royalty-free perpetual license to use the submission.
+Code is MIT-licensed. By Kaggle competition rules, submissions grant
+the Competition Sponsor a non-exclusive, royalty-free, perpetual
+license to use the submission.

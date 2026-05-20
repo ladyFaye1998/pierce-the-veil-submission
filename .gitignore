@@ -32,3 +32,9 @@ kaggle_push/
 
 # Redundant submission.csv (regenerable from notebooks)
 notebook/submission.csv
+
+# Local-only resized / base64-encoded banner intermediates (regenerable from
+# assets/banner.png via build_notebooks.py; banner_1200.jpg is kept as the
+# JPEG actually embedded into the notebooks).
+assets/banner_1200.png
+assets/banner_1200_base64.txt

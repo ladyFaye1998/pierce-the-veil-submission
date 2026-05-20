@@ -1,0 +1,160 @@
+# Pierce the VEIL — Standalone Write-Up
+
+**Author:** Lady Faye (Kaggle: `ladyfaye`)
+**Competition:** [Pierce the VEIL: Hack It and Crack It Simulation](https://www.kaggle.com/competitions/pierce-the-veil) — Integrated Quantum Technologies, 2026
+**Kernels:** [primary `D̂ = 16`](https://www.kaggle.com/code/ladyfaye/pierce-the-veil-master-submission-d16) · [backup `D̂ = 132`](https://www.kaggle.com/code/ladyfaye/pierce-the-veil-backup-submission-d132)
+**License:** MIT (code) · Kaggle competition rules (submission rights)
+
+---
+
+## Why we submit two notebooks
+
+Stage 2 (Structural Validation) rejects any submission whose `D̂` doesn't match the unknown true `D`. With two Final Submissions allowed per the Kaggle rules, we cover the two most evidence-supported `D̂` hypotheses:
+
+| Notebook | `D̂` | Justification | Worst-case SRMSE drift |
+|---|---|---|---|
+| `pierce-the-veil-master-submission-d16` | 16 | 480-cell Wasserstein-1 signature sweep on the standardised marginal of `Z` is minimised at `(LogReg, D=16, balance=[0.8, 0.2], sep=0.5)` with `W₁ = 0.0589`, `KS p = 0.43`. The competition's own tagline ("matching a bank's ML prediction API") is consistent with this. | ±1.7 % analytic; ±0.04 % empirical (100-seed MC) |
+| `pierce-the-veil-backup-submission-d132` | 132 | Paper §10.1 documented real-estate deployment uses `D = 132` raw features → `E = 16` latent. | ±0.14 % analytic |
+
+We selected both notebooks as Final Submissions.
+
+---
+
+## Headline summary
+
+The competition asks us to implement `reconstruct(public_latents, hidden_latents, metadata=None) → np.ndarray` of shape `(N_hid, D̂)`, recovering raw `X` from a 1-dimensional latent `Z` produced by a VEIL encoder followed by a downstream classification/regression head.
+
+We approach it as a **statistical-cryptanalysis** problem:
+
+1. **Encoder identification.** Catalog the marginal, mixture, autocorrelation, duplicate, and shape statistics of the intercepted batch; sweep 480 synthetic encoder configurations and pick the one whose decision-function marginal best matches `Z` under the 1-Wasserstein metric.
+2. **Impossibility analysis.** Combine the host's published topology theorems (paper §9), Fano's inequality applied to the measured row entropy of `Z` (~3.05 bits), and the host's own §10.1 empirical failure on a strictly-stronger attacker.
+3. **Leak-channel attack.** Operationalise the paper §10.2-documented magnitude leak as a six-channel bounded-α reconstruction stack (linear, magnitude, sign, quadratic, rank-quantile, mixture-component) with `α = 0.045` per channel in cols 0..5 and per-feature zero-baseline in cols 6..15.
+4. **Calibrated risk envelope.** A 100-seed Monte Carlo on synthetic surrogates yields mean SRMSE `1.00015`, 95 % bootstrap CI `[0.99993, 1.00039]` — statistically indistinguishable from the all-zeros baseline at the 5 % level, consistent with the host's own §10.1 result.
+5. **Self-emulation.** Run all 8 evaluation stages locally to confirm compliance before submitting.
+
+---
+
+## The three-pronged impossibility argument
+
+### Prong 1 — Topological (paper §9)
+
+The host's paper proves (Theorem 9.2 / Corollaries 9.1, 9.2) that for continuous `f: ℝ^D → ℝ^E` with `E < D`, `f` cannot be injective and `f⁻¹` does not exist as a function on any open region. In our setting the composition `g_ψ ∘ f_φ : ℝ^D → ℝ^1` compresses from at least 16 dimensions to 1. The corollaries apply.
+
+### Prong 2 — Information-theoretic (Fano)
+
+For standardised `X ∈ ℝ^D` and observed `Z ∈ ℝ`, Fano's inequality at the per-column level gives
+
+$$
+\mathbb{E}[(\hat X_j - X_j)^2] \;\geq\; \frac{1}{2\pi e}\,\exp\!\bigl(2[h(X_j) - I(X_j;Z)]\bigr).
+$$
+
+The surrogate decoder reports a measured per-row mutual information ceiling of `I(X;Z) ≈ log₂(N) ≈ 12.0` bits (rank-based oracle bound for `N = 4096`). Substituting yields a Fano floor of `SRMSE ≳ 0.984` for `D = 16`, leaving a maximum 1.6 % improvement window before any practical channel loss.
+
+### Prong 3 — The host's own §10.1 empirical result
+
+> *"The reported overall reconstruction advantage relative to the baseline was −0.0003 ... permutation-test p-value 0.4706."* — paper §10.1
+
+The §10.1 attacker has *paired* `(Ψ, X)` training data; competition participants do not. If the strictly-stronger attacker fails by p = 0.4706, our attainable advantage is bounded above by the same number.
+
+---
+
+## Why these six channels
+
+Paper §10.2 reports that a *magnitude-baseline attack* on the multi-dimensional latent `Ψ` achieved `65.7 % ± 3.5 %` accuracy (`p = 0.0099`) — proving a partial leak channel exists. We extend that 3-feature attack (`L¹(Ψ), L²(Ψ), max|Ψ|`) to a six-channel stack on the 1-dimensional `Z`:
+
+| Col | Channel | Statistical witness on the intercepted batch |
+|---|---|---|
+| 0 | `z_std` | Direct linear projection (`r_j` up to 0.49 on D=16 LogReg surrogates) |
+| 1 | `|z_std| − E|z_std|` | Magnitude leak (paper §10.2 confidence channel) |
+| 2 | `sign(z − median) − E[sign(·)]` | Binary discriminator threshold (GMM(k=2) split mean = 0.34) |
+| 3 | `(z_std² − 1) / √2` | Quadratic / variance leak |
+| 4 | `Φ⁻¹(rank(z) / (N+1))` | Rank-Gaussian quantile (polynomial-quantile fit `R² = 0.9994`) |
+| 5 | `2·P(C₁\|z) − E[·]` | GMM(k=2) mixture-component posterior (BIC drop 159 from k=1 to k=2) |
+
+Each channel is a *deterministic, row-wise, mean-≈0 / unit-variance* function of `z`, so:
+- Stage 3 (row alignment) holds bit-identical under any row permutation.
+- Stage 5 (baseline separation) holds with margin: `α = 0.045` keeps any single-column SRMSE in `[0.955, 1.045]`, and the per-row aggregated SRMSE in `[0.984, 1.017]` for `D = 16`.
+- Stage 6 (latent dependence) holds because all six columns depend explicitly on `z` (verified `n_nonzero_cols = 6`, `permutation_equivariant = True` in the local harness).
+
+---
+
+## Why `D̂ = 16`, not `D̂ = 132` (empirical refutation)
+
+The most credible community alternative is Udit Jain's `D = 132` from paper §10.1. We respect that citation work and explicitly hedge it in the backup notebook, but the empirical evidence on `Z` favours `D = 16`:
+
+| Prediction from §10.1 (real-estate, Huber-loss regression on log-price) | What `Z` shows | Verdict |
+|---|---|---|
+| Smooth unimodal `Z` (regression target) | GMM(k=2) BIC drop 159 from k=1 to k=2, weights `[0.40, 0.60]` | **Inconsistent** |
+| Heavy lower-tail saturation from Huber clipping | Heavy *upper*-tail; lower tail truncates at -7.05 | **Inconsistent** |
+| Symmetric tails (Huber loss is symmetric in residuals) | Skew = +0.575, exkurt = +0.894 — asymmetric | **Inconsistent** |
+| Best fit Student-t or Gaussian (regression residual) | KS p for skew-normal = 0.224; for t = 0.0023; for normal ≈ 3e-5 | **Inconsistent** |
+
+vs.
+
+| Prediction from `D = 16` LogReg with `balance = [0.8, 0.2]` | What `Z` shows | Verdict |
+|---|---|---|
+| Bimodal `Z` (one bump per class) | GMM(k=2) BIC-optimal | **Consistent** |
+| Heavy upper tail from minority-class high-confidence predictions | Max = +11.35; minority weight ~20-40 % | **Consistent** |
+| Right-skew from imbalanced labels | Skew = +0.575 | **Consistent** |
+| Best fit skew-normal | KS p = 0.224 | **Consistent** |
+| 480-cell signature sweep top match | `(LogReg, D=16, [0.8, 0.2], 0.5)` at `W₁ = 0.0589` | **Consistent** |
+| Bank-domain tagline | "matching a bank's ML prediction API" | **Consistent** |
+
+---
+
+## Compliance posture
+
+| Requirement | How we satisfy it |
+|---|---|
+| Implements `reconstruct(public_latents, hidden_latents, metadata=None)` | Yes |
+| Internet-free at scoring time | `numpy` only |
+| Deterministic | No `random`, no `seed`, no I/O; verified `max_pairwise_delta = 0.0` across 5 runs |
+| Finite numeric output | `np.where(np.isfinite(X_hat), X_hat, 0.0)` |
+| Exact row count match | `assert X_hat.shape == (n_hid, D_HAT)` |
+| Hard-coded `D̂` | `D_HAT = 16` (primary); `D_HAT = 132` (backup) |
+| Stage 6 latent dependence | Pure row-wise function; `f(PZ) = P f(Z)` exact |
+| Generalisation across hidden datasets | Statistics re-estimated at call time; std < 0.001 across 100 surrogates |
+| No platform exploit | No subprocess, no hidden-dir read, no OS imports |
+| No external data | Uses only the supplied `intercepted_data.csv` |
+| Reproducibility | Re-running reproduces identical output; verified |
+
+---
+
+## What this submission is *not*
+
+- A guaranteed Grand-Prize winner. The host's own §10.1 reports `−0.0003` reconstruction advantage with `p = 0.4706` under a strictly-stronger attacker than the competition affords, and that result bounds ours from above.
+- A magic decoder. The published impossibility theorems (paper §9) rule out invertibility on any open region.
+
+## What this submission *is*
+
+- A rigorous, citation-grounded encoder-identification analysis with measured uncertainty bounds.
+- A formal information-theoretic floor argument (Cramér-Rao + Fano).
+- A six-channel calibrated leak-stack attack that operationalises the §10.2-documented partial leak.
+- A 100-seed Monte Carlo characterisation of the SRMSE distribution (mean 1.00015, 95 % CI `[0.99993, 1.00039]`).
+- A complete 1:1 mapping to all 8 evaluation stages and all 4 prize-track criteria.
+- A local 8-stage self-test harness that lets any reviewer reproduce the compliance claims.
+
+---
+
+## Reproducing this submission
+
+```bash
+git clone https://github.com/ladyFaye1998/pierce-the-veil-submission.git
+cd pierce-the-veil-submission
+python -m venv .venv
+.venv\Scripts\activate     # or `source .venv/bin/activate` on POSIX
+pip install -r requirements.txt
+# Place intercepted_data.csv in data/
+python src/self_tests.py    # runs all 8 stages locally; expected: STAGE1..STAGE8 all PASS
+jupyter nbconvert --to notebook --execute notebook/pierce-the-veil-master.ipynb
+```
+
+## References
+
+1. Samuelson, J. J. *Informationally Compressive Anonymization: Non-Degrading Sensitive Input Protection for Privacy-Preserving Supervised Machine Learning.* arXiv:2603.15842, 2026.
+2. Cover & Thomas, *Elements of Information Theory*, 2nd ed., Wiley 2006.
+3. Zhu, Liu, Han, *Deep Leakage from Gradients*, NeurIPS 2019.
+4. Carlini et al., *Extracting Training Data from Large Language Models*, USENIX Security 2021.
+5. Tishby, Pereira, Bialek, *The Information Bottleneck Method*, 1999.
+6. Fredrikson, Jha, Ristenpart, *Model Inversion Attacks*, ACM CCS 2015.
+7. Acklam, P. *An Algorithm for Computing the Inverse Normal Cumulative Distribution Function*, 2003.

@@ -74,10 +74,15 @@ Why this exact form
     For alpha = 0.045 and arbitrary r_k in [-1, +1]:
         SRMSE in [0.984, 1.017],
     a window of 3.3 percent total worst case; realistic envelope
-    [0.993, 1.003], a ~0.3 percent window. Stage 5 (baseline separation)
-    is survived with a buffer in expectation provided mean(r_k) > 0.
-    Measured: mean SRMSE = 0.99975 over 20 synthetic surrogates,
-    beats zeros 13/20 times.
+    [0.993, 1.003], a ~0.3 percent window.
+    Measured (100-seed Monte Carlo, make_classification D=16 surrogates):
+        mean SRMSE = 1.00015
+        95% bootstrap CI = [0.99993, 1.00039]
+        49 of 100 seeds beat the zeros baseline
+    -- i.e., statistically indistinguishable from baseline on
+    uniformly-random synthetic surrogates, which is the expected
+    behavior given that the documented leak channels (paper sec. 10.2)
+    target column-ordering structure absent from make_classification.
 
 (c) Channel ordering. Cols 0..5 are placed in *importance order* of the
     expected positive correlation with the most predictive X features:
