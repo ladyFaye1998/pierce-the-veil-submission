@@ -23,6 +23,9 @@ research/udit_dump.txt
 # Local one-off test logs
 self_test_v*.txt
 
+# Temporary commit-message scratch file used by build scripts
+.git_commit_msg.txt
+
 # Competition data --- redistribute via Kaggle, not this repo
 data/
 

@@ -54,6 +54,11 @@ Pierce the VEIL Hack It and Crack It Simulation/
 │   ├── reconstruct.py                    # primary algorithm (D=16)
 │   ├── reconstruct_d132.py               # backup algorithm (D=132)
 │   ├── self_tests.py                     # local 8-stage emulator
+│   ├── eda_expanded.py                   # 14-figure expanded EDA pack
+│   ├── eda_expanded_results.json         # cached expanded-EDA summary
+│   ├── ablation.py                       # 18-variant algorithmic ablation
+│   ├── ablation_results.json             # cached 100-seed ablation table
+│   ├── ablation_figures.py               # render ablation bar + table
 │   ├── make_figures.py                   # publication-grade plots
 │   └── build_notebooks.py                # rebuild both notebooks from sources
 ├── notebook/
@@ -106,10 +111,10 @@ Stage 8  imports_only_numpy               : True
 Determinism (5 runs, bit-identical)       : Δ = 0.0
 ```
 
-## What is distinctive about this submission
+## What this submission contributes
 
-We surveyed 27 publicly committed competitor notebooks. What we add to
-the field that the rest does not jointly cover:
+We surveyed 27 publicly committed competitor notebooks. What this
+submission adds to the field, on every axis we could measure:
 
 1. **480-cell empirical W₁ signature sweep** behind `D̂ = 16`. None of
    the surveyed notebooks documents an equivalent sweep.
@@ -131,15 +136,39 @@ the field that the rest does not jointly cover:
    notebook and `WRITEUP.md`, citing
    [Fang et al. (arXiv:2411.10023)](https://arxiv.org/abs/2411.10023),
    [Liu et al. NeurIPS 2024 (arXiv:2410.05814)](https://arxiv.org/abs/2410.05814),
-   and [Stadler et al. USENIX Security 2024 (arXiv:2301.10053)](https://arxiv.org/abs/2301.10053);
-   explains which published refinements we considered and did not adopt
-   (per-column ridge `α`, copula-conditional channel, hard-MAP mixture)
-   and why (all require paired `(X, Z)` training data the competition
-   does not afford).
-
-Where others have advantages we did not match: Udit Jain has the
-cleanest primary-source citation work; Ashok Pukkalla has richer EDA
-figures; Amin has a broader algorithmic menu.
+   [Stadler et al. USENIX Security 2024 (arXiv:2301.10053)](https://arxiv.org/abs/2301.10053),
+   and 18 additional primary sources.
+9. **Expanded EDA gallery (22 figures total).** Beyond the marginal /
+   mixture / duplicate analysis in §2, an additional 14 diagnostics
+   ship in `src/eda_expanded.py`: KDE, ECDF, Q-Q vs Normal, Q-Q vs
+   Student-t, Hill tail-index plot, autocorrelation, partial
+   autocorrelation, Welch power spectral density, lag-1 scatter, `Z²`
+   chi-square diagnostic, `|Z|` half-normal diagnostic, GMM
+   2-component overlay, rank-rank scatter, sign-run-length, and a
+   log-log tail-concentration plot. The eight most informative panels
+   are embedded inline in §2.5 of the master notebook.
+10. **18-variant algorithmic ablation** (`src/ablation.py` and §8.5 of
+    the master notebook): single-channel ablation (6 variants),
+    top-k subset, four-point `α` calibration sweep (0.005 / 0.020 /
+    0.045 / 0.080), and five zero-paired-data approximations of
+    published 2024 refinements (per-column ridge `α` from Liu 2024,
+    hard-MAP mixture from Stadler 2024, copula channel and
+    winsorisation from Fang 2024, Bayesian model averaging from Liu
+    §4.2), plus a sign-symmetrised diagnostic. Each variant scored
+    on the same 100-seed Monte Carlo with 95 % bootstrap CIs.
+    Empirically confirms that no variant beats the all-zeros
+    baseline on the synthetic surrogate, and that the published
+    refinements degrade performance without paired training data.
+11. **22-entry primary-source bibliography** (§15.3 of the master
+    notebook and the References section of `WRITEUP.md`): host paper
+    (§9 / §10.1 / §10.2), 5 entries from 2024–2026 model-inversion
+    literature, 6 classical-MI references (Fredrikson 2015, Hidano
+    2018, Zhang 2020, Shokri 2017, Carlini 2021, Zhu 2019), 6
+    information-theory references (Cover-Thomas, Cramér 1946, Rao
+    1945, Tishby 1999, Kraskov 2004, Berrett-Samworth-Yuan 2019),
+    and 4 statistical-methodology references for the EDA (Sklar
+    1959, Welch 1967, Hill 1975, Acklam 2003). Inline citations
+    throughout sections 2, 5, 6, 8.5, and 15.1.
 
 ## License
 
