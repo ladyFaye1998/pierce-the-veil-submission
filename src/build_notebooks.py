@@ -1302,7 +1302,7 @@ MASTER_S10_REFUTE_D132 = """\
 
 ## 10. Why `D\u0302 = 16`, not `D\u0302 = 132` (an empirical refutation)
 
-The most credible community alternative to our `D = 16` is Udit Jain's `D = 132`, taken from paper \u00a710.1's real-estate deployment. We respect the citation work and explicitly hedge it in our backup notebook, but the empirical evidence on `Z` actually *disfavours* the `D = 132` deployment.
+The strongest alternative to our `D = 16` is `D = 132`, drawn from paper \u00a710.1's real-estate deployment. We hedge that case explicitly in the backup notebook, but the empirical evidence on `Z` *disfavours* the `D = 132` deployment.
 
 Three falsifiable predictions that the \u00a710.1 deployment makes about `Z`, and what `Z` actually shows:
 
@@ -1331,32 +1331,34 @@ We conclude: the *primary submission* should target `D = 16` based on the empiri
 MASTER_S11_DIFFERENTIATION = """\
 ---
 
-## 11. Comparison With Other Public Submissions
+## 11. Landscape of Approaches in the Public Submission Pool
 
-We surveyed 27 publicly committed competitor notebooks. Summary of choices and approaches:
+To situate this submission, we read the publicly committed competitor notebooks and grouped the design choices we observed. We list approaches at the *strategy* level, anonymously, because the judging is per-submission and listing names risks misrepresenting individual contributors.
 
-| Competitor                  | `D\u0302`     | Strategy                                                | Comparison note                                                                                          |
-|-----------------------------|---------|---------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
-| Udit Jain (paper-grounded)  | 132     | 132 active feature cols (tanh / Fourier / Hermite), `\u03b1=1.0` | His features have per-column variance ~0.5, so on uncorrelated columns the per-col SRMSE is ~1.1, total \u22481.1. He explicitly forfeits Stage 4 for partial-leak focus; ours is calibrated to stay near 1.0. |
-| Jeki Wan Taufik (17 votes)  | ~32     | TruncatedSVD + spectral EM on `|P \u2212 H|`                  | His shape `|P_a \u2212 H_a|` broadcasts incorrectly for `N_hid \u2260 4096`; row-alignment risk at Stage 3. |
-| Ashok Pukkalla              | 23      | Copula sampler over HELOC OSINT marginals               | Uses external public data (allowed but disclosed); cols 0..22 manufactured.                              |
-| Amin (ensemble + neural)    | ~10     | 5-strategy ensemble incl. KRR + manifold                | Requires GPU + internet; may trip Stage 8's "no internet" check.                                          |
-| Gowthaman                   | 4       | rescale + qnorm + GMM-prob + sigmoid (4 cols)           | Same channel family as ours but only 4 channels and `D\u0302=4` (no signature evidence for `D=4`).            |
-| merkiraz (D=1 minimal)      | 1       | Identity map                                            | Safest Stage 2 / 6 pass; forfeits the partial-reconstruction prize entirely.                              |
-| Dhruv / Ayush / Avik / ...  | various | trig basis / kernel ridge / SSA delay-embedding         | Various determinism, equivariance, or internet-dependence concerns.                                       |
+| Strategy family                            | Typical `D\u0302`        | Approach                                                                          | Trade-off                                                                                              |
+|--------------------------------------------|---------------------------|-----------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| Paper-grounded high `D`                    | 132                       | Many active feature columns with deterministic non-linear bases (tanh / Fourier / Hermite), large `\u03b1` | Optimises partial-reconstruction breadth; the per-column variance is high enough that the aggregate SRMSE drifts above the zeros baseline. |
+| Spectral / matrix-factorisation            | ~30                       | TruncatedSVD or EM on a public-vs-hidden distance / energy matrix                | Powerful when `N_hid = N_pub`; row-alignment is sensitive to shape mismatch.                            |
+| Copula / OSINT-marginal sampler            | 20\u201330                | Manufactured columns from external public-data marginals (e.g. credit / housing) | Plausible per-feature shape; per-row correspondence to the hidden `X` is by construction unverifiable. |
+| Ensemble (kernel / NN / manifold)          | ~10                       | Multiple reconstructors combined with held-out validation                          | Strongest when training pairs exist; in the no-paired-data setting it converges toward a flat-`\u03b1` mix. |
+| Few-channel calibrated leak                | 4                         | Rescale + quantile-transform + GMM probability + sigmoid                          | Same channel family as this submission, with a smaller column budget.                                  |
+| Minimal `D = 1` identity                   | 1                         | `X_hat = z`                                                                       | Safest structural-validation pass; declines the partial-reconstruction track by construction.          |
+| Other (trig basis / kernel ridge / SSA)    | varies                    | Periodic-basis or delay-embedding readouts                                        | Most informative when the latent has documented periodicity, less so on the observed marginal.          |
 
-**What this submission contributes** (descriptive list, not "we are best"):
+This submission sits in the **calibrated multi-channel leak** corner of that landscape (six channels at `\u03b1 = 0.045`), informed by paper \u00a710.2's documented magnitude-leak baseline.
 
-1. **480-cell empirical W\u2081 signature sweep** behind `D\u0302 = 16`. None of the surveyed notebooks documents an equivalent sweep.
-2. **Six-channel calibrated leak stack** combining all of: linear, magnitude, sign, quadratic, rank-quantile, mixture-component. Gowthaman has four of these; nobody combines all six in a bounded-`\u03b1` framework.
-3. **Cram\u00e9r-Rao + Fano-inequality SRMSE floor** with measured `H(X|Z) \u2248 3.05` bits. No other notebook combines both bounds.
-4. **Three-pronged impossibility argument** (topology + Fano + host \u00a710.1 empirics). Udit covers two prongs; merkiraz covers two.
-5. **Local 8-stage emulator** + 100-seed Monte Carlo. Among the public submissions, only the official starter notebook ships an in-notebook self-test.
-6. **Dual `D\u0302` hedge** (`D=16` primary + `D=132` backup).
+**What this notebook includes** (purely descriptive; no comparative ranking implied):
+
+1. **480-cell empirical W\u2081 signature sweep** behind `D\u0302 = 16`, cached in `src/signature_results.json`.
+2. **Six-channel calibrated leak stack**: linear, magnitude, sign, quadratic, rank-Gaussian quantile, GMM mixture-component, in a bounded-`\u03b1` framework.
+3. **Cram\u00e9r--Rao + Fano-inequality SRMSE floor** with measured `H(X|Z) \u2248 3.05` bits (\u00a75).
+4. **Three-pronged impossibility argument**: topology (paper \u00a79), Fano lower bound, and the published \u00a710.1 empirical result on a strictly-stronger attacker.
+5. **Local 8-stage emulator** plus a 100-seed Monte Carlo characterisation of the SRMSE distribution.
+6. **Dual `D\u0302` hedge** (`D = 16` primary + `D = 132` backup) submitted as both Final Submissions.
 7. **Compliance posture**: internet off in metadata, numpy-only imports, no `random` calls, bit-identical determinism across 5 runs.
-8. **Measured calibrated SRMSE envelope** in synthetic surrogates: 100-seed mean 1.00015 with 95 % bootstrap CI `[0.99993, 1.00039]`; statistically indistinguishable from the zeros baseline.
-9. **Expanded EDA gallery** (\u00a72.5 + 14-figure full pack in `src/eda_expanded.py`): marginal KDE, ECDF, Q-Q-Normal, Q-Q-Student-t, Hill plot, autocorrelation, partial autocorrelation, Welch PSD, lag-1 scatter, `Z\u00b2` chi-square, |Z| half-normal, GMM-component overlay, sign-run-length, rank-rank scatter, log-log tail concentration. Combined figure budget (22 panels) exceeds the EDA-richness of any single surveyed notebook.
-10. **18-variant algorithmic ablation** (\u00a78.5 + `src/ablation.py`): single-channel ablation (6 variants), top-k subset (1), four-point calibration sweep (4), five 2024 literature refinements (per-column \u03b1 / hard-MAP / copula / Bayesian-average / winsorised), and a sign-symmetrised diagnostic. Each variant scored on the same 100-seed Monte Carlo. The shipped configuration is highlighted and its calibration choice is empirically defended against alternative \u03b1 levels.
+8. **Measured SRMSE envelope** on synthetic surrogates: 100-seed mean 1.00015 with 95 % bootstrap CI `[0.99993, 1.00039]`; statistically indistinguishable from the zeros baseline.
+9. **Expanded EDA gallery** (\u00a72.5 + 14-figure full pack in `src/eda_expanded.py`): marginal KDE, ECDF, Q-Q-Normal, Q-Q-Student-t, Hill plot, autocorrelation, partial autocorrelation, Welch PSD, lag-1 scatter, `Z\u00b2` chi-square, |Z| half-normal, GMM-component overlay, sign-run-length, rank-rank scatter, log-log tail concentration. The combined figure budget is 22 panels.
+10. **18-variant algorithmic ablation** (\u00a78.5 + `src/ablation.py`): single-channel ablation, top-`k` subset, four-point calibration sweep, and five zero-paired-data approximations of published 2024 refinements (per-column \u03b1 / hard-MAP / copula / Bayesian-average / winsorised). Each variant is evaluated on the same 100-seed Monte Carlo and reported with 95 % bootstrap CIs.
 11. **22-entry primary-source bibliography** (\u00a715.3): host paper (\u00a79 / \u00a710.1 / \u00a710.2), 5 entries from the 2024--2026 model-inversion literature, 6 classical-MI references, 6 information-theory references, and 4 statistical-methodology references for the EDA. Inline citations throughout sections 2, 5, 6, 8.5, and 15.1.
 """
 
@@ -1421,7 +1423,7 @@ This section maps every line of the official evaluation rubric and every prize-t
 | Prize track                          | Where this notebook addresses it                                                                                                                                                              |
 |--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Full Reconstruction (Grand Prize)    | Targeted opportunistically by \u00a76 six-channel attack; \u00a79 100-seed Monte Carlo measures expected gain. \u00a74.3 reports the published \u00a710.1 result on a strictly-stronger attacker, which bounds any honest gain from above. |
-| Best Attack Strategy & Analysis      | \u00a73 (W\u2081 signature sweep), \u00a74 (three-pronged impossibility), \u00a75 (Cram\u00e9r-Rao + Fano floors), \u00a76 (six-channel calibrated leak stack), \u00a710 (D=132 refutation), \u00a711 (head-to-head with 27 competitors). |
+| Best Attack Strategy & Analysis      | \u00a73 (W\u2081 signature sweep), \u00a74 (three-pronged impossibility), \u00a75 (Cram\u00e9r-Rao + Fano floors), \u00a76 (six-channel calibrated leak stack), \u00a710 (D=132 refutation), \u00a711 (landscape of approaches in the public submission pool). |
 | Partial Reconstruction               | \u00a76 six leak channels (linear / magnitude / sign / quadratic / rank-quantile / mixture-component); \u00a79 100-seed Monte Carlo measures the calibrated SRMSE envelope (95 % CI `[0.99993, 1.00039]`). The channels carry the \u00a710.2-documented partial signal; whether it materialises on the hidden `X` depends on the unknown column ordering. |
 | Best Technical Write-Up              | This notebook end-to-end. Claim \u2192 empirical evidence \u2192 primary-source citation. Reference list in \u00a715.                                                                                          |
 
@@ -1478,7 +1480,7 @@ We deliver, in priority order:
 4. A local 8-stage validation harness so reviewers can verify each compliance claim.
 5. A second submission as a `D\u0302 = 132` hedge.
 6. A three-pronged impossibility argument (topology + Fano + published \u00a710.1 empirics).
-7. An explicit head-to-head with the strongest 27 public submissions, an explicit rubric-mapped walkthrough (\u00a714), and a positioning within the recent literature (\u00a715.1).
+7. A landscape view of the design choices visible in the public submission pool, an explicit rubric-mapped walkthrough (\u00a714), and a positioning within the recent literature (\u00a715.1).
 
 What we do not deliver:
 - A guaranteed winning SRMSE for the Grand Prize. The published \u00a710.1 result reports `\u22120.0003` reconstruction advantage under a strictly stronger attacker, and that result bounds ours from above.
@@ -1493,7 +1495,7 @@ We deliver, in priority order:
 4. A local 8-stage validation harness so reviewers can verify each compliance claim.
 5. A second submission as a `D\u0302 = 132` hedge.
 6. A three-pronged impossibility argument (topology + Fano + host empirics).
-7. An explicit head-to-head with the strongest 27 public submissions and an explicit rubric-mapped walkthrough (\u00a714).
+7. A landscape view of the design choices visible in the public submission pool and an explicit rubric-mapped walkthrough (\u00a714).
 
 What we do not deliver:
 - A guaranteed winning SRMSE for the Grand Prize. The published \u00a710.1 result reports `\u22120.0003` reconstruction advantage under a strictly stronger attacker, and that result bounds ours from above.
@@ -1585,7 +1587,7 @@ See the primary notebook `pierce-the-veil-master-submission-d16` for:
 - the three-pronged impossibility argument (topology + Fano + host \u00a710.1 empirics),
 - the Cram\u00e9r-Rao + Fano-inequality SRMSE floor derivation,
 - the rubric-mapped 8-stage / 4-prize-track walkthrough,
-- the head-to-head with 27 public competitor notebooks.
+- the landscape view of the design choices visible in the public submission pool.
 """
 
 

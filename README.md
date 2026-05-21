@@ -62,10 +62,8 @@ Pierce the VEIL Hack It and Crack It Simulation/
 │   ├── make_figures.py                   # publication-grade plots
 │   └── build_notebooks.py                # rebuild both notebooks from sources
 ├── notebook/
-│   ├── pierce-the-veil-master.ipynb              # PRIMARY submission
-│   ├── pierce-the-veil-master.executed.ipynb     # reference run output
-│   ├── pierce-the-veil-backup-d132.ipynb         # BACKUP submission
-│   └── pierce-the-veil-backup-d132.executed.ipynb
+│   ├── pierce-the-veil-master.ipynb              # PRIMARY submission (executed)
+│   └── pierce-the-veil-backup-d132.ipynb         # BACKUP submission (executed)
 ├── figures/                              # generated plots
 ├── research/                             # scraped competition pages (notebooks in .gitignore)
 ├── kaggle_push/                          # staging for kaggle CLI push (in .gitignore)
@@ -111,25 +109,29 @@ Stage 8  imports_only_numpy               : True
 Determinism (5 runs, bit-identical)       : Δ = 0.0
 ```
 
-## What this submission contributes
+## What this submission includes
 
-We surveyed 27 publicly committed competitor notebooks. What this
-submission adds to the field, on every axis we could measure:
+A descriptive list of the artifacts that ship in this repository and the
+two Kaggle kernels. Nothing here is offered as a ranking against other
+participants; their work is their own and judges will weigh it on its
+own merits.
 
-1. **480-cell empirical W₁ signature sweep** behind `D̂ = 16`. None of
-   the surveyed notebooks documents an equivalent sweep.
+1. **480-cell empirical W₁ signature sweep** for `D̂ = 16`
+   (`src/signature_match.py`, cached in `src/signature_results.json`).
 2. **Six-channel calibrated leak stack** combining linear, magnitude,
    sign, quadratic, rank-Gaussian quantile, and GMM mixture-component
-   leaks in a bounded-`α` framework. Gowthaman covers four of these;
-   no other notebook combines all six.
-3. **Cramér-Rao + Fano-inequality SRMSE floor** with measured `H(X|Z)
-   ≈ 3.05` bits. No other notebook combines both floors.
-4. **Three-pronged impossibility argument** (topology + Fano + the
-   published §10.1 empirics). Udit covers two prongs; merkiraz covers two.
-5. **Local 8-stage emulator** and 100-seed Monte Carlo characterisation
-   of the SRMSE distribution.
-6. **Dual `D̂` hedge** (`D = 16` primary + `D = 132` backup) as Final
-   Submissions.
+   leaks in a bounded-`α` framework (`src/reconstruct.py`).
+3. **Cramér–Rao + Fano-inequality SRMSE floor** with measured
+   `H(X|Z) ≈ 3.05` bits (master notebook §5).
+4. **Three-pronged impossibility argument**: topological non-invertibility
+   (paper §9), Fano lower bound, and the published §10.1 empirical
+   result on a strictly-stronger attacker.
+5. **Local 8-stage emulator** (`src/self_tests.py`) and 100-seed Monte
+   Carlo characterisation of the SRMSE distribution
+   (master notebook §9).
+6. **Dual `D̂` hedge**: `D = 16` primary (`pierce-the-veil-master-submission-d16`)
+   and `D = 132` backup (`pierce-the-veil-backup-submission-d132`) as
+   Final Submissions.
 7. **Compliance posture**: internet off in metadata, numpy-only
    imports, no `random` calls, bit-identical determinism across 5 runs.
 8. **2024–2026 literature contextualization** in §15.1 of the master
@@ -138,10 +140,10 @@ submission adds to the field, on every axis we could measure:
    [Liu et al. NeurIPS 2024 (arXiv:2410.05814)](https://arxiv.org/abs/2410.05814),
    [Stadler et al. USENIX Security 2024 (arXiv:2301.10053)](https://arxiv.org/abs/2301.10053),
    and 18 additional primary sources.
-9. **Expanded EDA gallery (22 figures total).** Beyond the marginal /
-   mixture / duplicate analysis in §2, an additional 14 diagnostics
-   ship in `src/eda_expanded.py`: KDE, ECDF, Q-Q vs Normal, Q-Q vs
-   Student-t, Hill tail-index plot, autocorrelation, partial
+9. **Expanded EDA gallery** (22 figures total). Beyond the original
+   marginal / mixture / duplicate analysis, an additional 14
+   diagnostics ship in `src/eda_expanded.py`: KDE, ECDF, Q-Q vs Normal,
+   Q-Q vs Student-t, Hill tail-index plot, autocorrelation, partial
    autocorrelation, Welch power spectral density, lag-1 scatter, `Z²`
    chi-square diagnostic, `|Z|` half-normal diagnostic, GMM
    2-component overlay, rank-rank scatter, sign-run-length, and a
@@ -149,23 +151,23 @@ submission adds to the field, on every axis we could measure:
    are embedded inline in §2.5 of the master notebook.
 10. **18-variant algorithmic ablation** (`src/ablation.py` and §8.5 of
     the master notebook): single-channel ablation (6 variants),
-    top-k subset, four-point `α` calibration sweep (0.005 / 0.020 /
+    top-`k` subset, four-point `α` calibration sweep (0.005 / 0.020 /
     0.045 / 0.080), and five zero-paired-data approximations of
     published 2024 refinements (per-column ridge `α` from Liu 2024,
     hard-MAP mixture from Stadler 2024, copula channel and
     winsorisation from Fang 2024, Bayesian model averaging from Liu
     §4.2), plus a sign-symmetrised diagnostic. Each variant scored
     on the same 100-seed Monte Carlo with 95 % bootstrap CIs.
-    Empirically confirms that no variant beats the all-zeros
-    baseline on the synthetic surrogate, and that the published
-    refinements degrade performance without paired training data.
+    Findings reported as measured: no variant statistically beats the
+    all-zeros baseline on the synthetic surrogate, and the published
+    refinements offer no advantage without paired training data.
 11. **22-entry primary-source bibliography** (§15.3 of the master
     notebook and the References section of `WRITEUP.md`): host paper
     (§9 / §10.1 / §10.2), 5 entries from 2024–2026 model-inversion
     literature, 6 classical-MI references (Fredrikson 2015, Hidano
     2018, Zhang 2020, Shokri 2017, Carlini 2021, Zhu 2019), 6
-    information-theory references (Cover-Thomas, Cramér 1946, Rao
-    1945, Tishby 1999, Kraskov 2004, Berrett-Samworth-Yuan 2019),
+    information-theory references (Cover–Thomas, Cramér 1946, Rao
+    1945, Tishby 1999, Kraskov 2004, Berrett–Samworth–Yuan 2019),
     and 4 statistical-methodology references for the EDA (Sklar
     1959, Welch 1967, Hill 1975, Acklam 2003). Inline citations
     throughout sections 2, 5, 6, 8.5, and 15.1.

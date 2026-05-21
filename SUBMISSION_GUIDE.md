@@ -71,8 +71,8 @@ Without this step the kernels exist on Kaggle but are **not entered**.
 1. **Best Attack Strategy & Analysis** — the forensic writeup in
    `pierce-the-veil-master.ipynb`: 480-cell W₁ encoder sweep, three-pronged
    impossibility argument, Cramér-Rao + Fano floors, six-channel
-   calibrated leak stack, D=132 refutation, head-to-head with 27 public
-   competitor notebooks.
+   calibrated leak stack, D=132 refutation, and a landscape view of the
+   design choices visible in the public submission pool.
 2. **Best Technical Write-Up** — same notebook, double-purposed: every
    claim tied to either an in-notebook computation or a primary-source
    citation; rubric-mapped walkthrough in §14; standalone

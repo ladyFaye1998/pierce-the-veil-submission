@@ -80,7 +80,7 @@ Each channel is a *deterministic, row-wise, mean-≈0 / unit-variance* function 
 
 ## Why `D̂ = 16`, not `D̂ = 132` (empirical refutation)
 
-The most credible community alternative is Udit Jain's `D = 132` from paper §10.1. We respect that citation work and explicitly hedge it in the backup notebook, but the empirical evidence on `Z` favours `D = 16`:
+The strongest alternative `D` hypothesis is `D = 132`, drawn from paper §10.1's documented real-estate deployment. We hedge that case explicitly in the backup notebook, but the empirical evidence on `Z` favours `D = 16`:
 
 | Prediction from §10.1 (real-estate, Huber-loss regression on log-price) | What `Z` shows | Verdict |
 |---|---|---|
