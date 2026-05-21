@@ -64,8 +64,9 @@ Pierce the VEIL Hack It and Crack It Simulation/
 ├── figures/                              # generated plots
 ├── research/                             # scraped competition pages (notebooks in .gitignore)
 ├── kaggle_push/                          # staging for kaggle CLI push (in .gitignore)
-├── SUBMISSION_GUIDE.md                   # upload recipe
+├── SUBMISSION_GUIDE.md                   # upload recipe + Final-Submission checklist
 ├── WRITEUP.md                            # standalone judge-friendly writeup
+├── DISCUSSION_POST.md                    # draft Kaggle Discussion-forum thread body
 ├── LICENSE                               # MIT (code) / Kaggle rules (submission)
 └── README.md                             # this file
 ```
@@ -126,6 +127,15 @@ the field that the rest does not jointly cover:
    Submissions.
 7. **Compliance posture**: internet off in metadata, numpy-only
    imports, no `random` calls, bit-identical determinism across 5 runs.
+8. **2024–2026 literature contextualization** in §15.1 of the master
+   notebook and `WRITEUP.md`, citing
+   [Fang et al. (arXiv:2411.10023)](https://arxiv.org/abs/2411.10023),
+   [Liu et al. NeurIPS 2024 (arXiv:2410.05814)](https://arxiv.org/abs/2410.05814),
+   and [Stadler et al. USENIX Security 2024 (arXiv:2301.10053)](https://arxiv.org/abs/2301.10053);
+   explains which published refinements we considered and did not adopt
+   (per-column ridge `α`, copula-conditional channel, hard-MAP mixture)
+   and why (all require paired `(X, Z)` training data the competition
+   does not afford).
 
 Where others have advantages we did not match: Udit Jain has the
 cleanest primary-source citation work; Ashok Pukkalla has richer EDA
