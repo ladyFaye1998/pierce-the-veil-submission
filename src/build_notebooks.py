@@ -553,10 +553,10 @@ MASTER_TITLE = """\
 **License:** MIT (code) / Kaggle competition rules (submission rights)
 
 **Tracks targeted (in priority order)**
-1. Best Attack Strategy & Analysis --- $1,200
-2. Best Technical Write-Up --- $200
-3. Partial Reconstruction --- $600
-4. Full Reconstruction Grand Prize --- $8,000 (attempted under documented constraints; see \u00a76 for the host's own impossibility proof and \u00a77 for our six-channel attack on what *is* leakable)
+1. Best Attack Strategy & Analysis
+2. Best Technical Write-Up
+3. Partial Reconstruction
+4. Full Reconstruction Grand Prize (attempted under documented constraints; see \u00a74 for the published impossibility result and \u00a76 for our six-channel attack on what *is* leakable)
 """
 
 
@@ -565,9 +565,9 @@ MASTER_TLDR = """\
 
 ## TL;DR
 
-We approach the competition as a **statistical-cryptanalysis** problem on the *Vector-Encoded Information Layer* (VEIL) described in [arXiv:2603.15842](https://arxiv.org/abs/2603.15842) by the competition host, J. J. Samuelson. The paper proves (\u00a79) and demonstrates empirically (\u00a710.1) that the encoder is **non-invertible** even when an attacker has *strictly more* information than this competition affords (paired `(\u03a8, X)` training pairs --- the \u00a710.1 attacker reports a reconstruction advantage of **\u22120.0003, p = 0.4706**). Under those constraints, full reconstruction is not on the table, and we say so plainly.
+We approach the competition as a **statistical-cryptanalysis** problem on the *Vector-Encoded Information Layer* (VEIL) described in the reference paper [arXiv:2603.15842](https://arxiv.org/abs/2603.15842) (Samuelson, 2026). The paper proves (\u00a79) and demonstrates empirically (\u00a710.1) that the encoder is **non-invertible** even when an attacker has *strictly more* information than this competition affords (paired `(\u03a8, X)` training pairs --- the \u00a710.1 attacker reports a reconstruction advantage of **\u22120.0003, p = 0.4706**). Under those constraints, full reconstruction is not attainable in expectation, and we say so plainly.
 
-What is left is a *partial* leak channel that the paper itself acknowledges (\u00a710.2: "the magnitude baseline attack ... 65.7 % \u00b1 3.5 % accuracy, p = 0.0099"). We exploit it as follows:
+What is left is a *partial* leak channel that the reference paper documents (\u00a710.2: "the magnitude baseline attack ... 65.7 % \u00b1 3.5 % accuracy, p = 0.0099"). We operationalise it as follows:
 
 1. **Identify the encoder family.** A 480-cell Wasserstein-1 signature sweep over synthetic surrogates (LogReg / GradientBoosting decision functions, sweeping `D \u2208 {4..30}`, class balance, separation, noise) finds a single best-matching cell: `D = 16`, `LogReg`, balance `[0.8, 0.2]`, sep `0.5`, **W\u2081 = 0.0589, KS p = 0.43**. We commit to **`D\u0302 = 16`** and hedge with **`D\u0302 = 132`** in the companion notebook (paper \u00a710.1's documented real-estate deployment).
 
@@ -575,11 +575,11 @@ What is left is a *partial* leak channel that the paper itself acknowledges (\u0
 
 3. **Submit** a deterministic, internet-free, permutation-equivariant `reconstruct()` whose 16-dim output places **six bounded leak channels** (linear, magnitude, sign, quadratic, rank-Gaussian quantile, GMM mixture-component) in columns 0..5 with `\u03b1 = 0.045` per channel; the remaining 10 columns are the zero-baseline (per-feature mean of a standardised X). The calibrated-risk bound is **+0.14 %** worst-case drift and **\u22120.23 %** best-case drift from the all-zeros SRMSE.
 
-4. **Measure expected behavior** via a 100-seed Monte Carlo on synthetic surrogates (\u00a79): mean SRMSE **1.00015**, 95 % bootstrap CI `[0.99993, 1.00039]` --- statistically indistinguishable from the zeros baseline at the 5 % level on uniformly-random synthetic surrogates, which is consistent with the host's own \u00a710.1 result on a strictly-stronger attacker. The point estimate is at baseline; the calibrated variance is the smaller envelope we deliver compared to any non-trivial attack.
+4. **Measure expected behavior** via a 100-seed Monte Carlo on synthetic surrogates (\u00a79): mean SRMSE **1.00015**, 95 % bootstrap CI `[0.99993, 1.00039]` --- statistically indistinguishable from the zeros baseline at the 5 % level on uniformly-random synthetic surrogates, which is consistent with the published \u00a710.1 result on a strictly-stronger attacker. The point estimate is at baseline; the calibrated variance is the smaller envelope we deliver compared to any non-trivial attack.
 
 5. **Self-test** the submission against an in-notebook emulation of all 8 evaluation stages (\u00a78) and audit the code line-by-line (\u00a712).
 
-**What this submission is not:** a guaranteed Grand-Prize winner. The host's own paper rules that out under stronger attacker conditions, and we report that fact directly.
+**What this submission is not:** a guaranteed Grand-Prize winner. The reference paper rules that out under stronger attacker conditions, and we report that fact directly.
 
 **What this submission is:**
 - A rigorous, citation-grounded encoder-identification analysis with measured uncertainty bounds.
@@ -653,9 +653,9 @@ MASTER_S3_DECISION = """\
 
 The minimum-W\u2081 cell on the full 480-cell sweep is `(LogReg, D=16, balance=[0.8, 0.2], sep=0.5)`. The runner-up (`D=20, balance=[0.9, 0.1]`) has W\u2081 = 0.0627, ~6 % worse. The runner-runner-up (`D=12, balance=[0.9, 0.1], sep=1.0`) is at W\u2081 = 0.0671. All top-5 cells share **`balance \u2248 [0.8, 0.2]` or `[0.9, 0.1]`** and **`D \u2208 {10..20}`** --- a tight, internally-consistent cluster.
 
-`D=16` also matches the canonical *UCI Bank Marketing* feature count (16-17 features), and the competition's press-release tagline is *"matching a bank's ML prediction API."* The two pieces of evidence (empirical signature + tagline domain) point at the same `D`. We commit to `D\u0302 = 16`.
+`D=16` also matches the canonical *UCI Bank Marketing* feature count (16-17 features), and the competition announcement tagline is *"matching a bank's ML prediction API."* The two pieces of evidence (empirical signature + announcement domain) point at the same `D`. We commit to `D\u0302 = 16`.
 
-The backup notebook covers `D\u0302 = 132` (paper \u00a710.1 real-estate deployment) in case the host built a different deployment than the bank-domain narrative suggests.
+The backup notebook covers `D\u0302 = 132` (paper \u00a710.1 real-estate deployment) in case the underlying deployment is the published \u00a710.1 one rather than the bank-domain framing of the announcement.
 """
 
 
@@ -668,7 +668,7 @@ We assemble *three independent arguments* that full reconstruction is structural
 
 ### 4.1 Prong 1 --- Topological (paper \u00a79)
 
-The host's own paper proves three theorems we restate verbatim:
+The reference paper proves three theorems we restate verbatim:
 
 - **Theorem 9.2 (Encoder Non-Injectivity).** *Let `D > E \u2265 1`, `U \u2286 R^D` a nonempty open set, `f: U \u2192 R^E` continuous. Then `f` cannot be injective.*
 - **Corollary 9.1 (Encoder Non-Invertibility).** *For any continuous `f: R^D \u2192 R^E` with `E < D`, the inverse `f\u207b\u00b9` does not exist as a function defined on any open region of its domain.*
@@ -686,13 +686,13 @@ $$
 
 A surrogate decoder fit on the matched synthetic generator (full code in `src/surrogate_decoder.py`) gives an empirical `H(X|Z) \u2248 3.05` bits per row. Combined with `D \u2265 16` and per-feature unit variance, this forces `SRMSE \u2265` ~`0.96` even with optimal use of all the information `Z` carries. Section 5.2 derives the tighter floor.
 
-### 4.3 Prong 3 --- The host's own empirical failure (paper \u00a710.1)
+### 4.3 Prong 3 --- The published \u00a710.1 empirical result
 
-> *"The decoder-based attack likewise failed to produce useful recovery. The reported overall reconstruction advantage relative to the baseline was \u22120.0003, indicating that the trained decoder performed slightly worse than the naive baseline ... and the corresponding permutation-test p-value was 0.4706."* --- paper \u00a710.1
+> *"The decoder-based attack likewise failed to produce useful recovery. The reported overall reconstruction advantage relative to the baseline was \u22120.0003, indicating that the trained decoder performed slightly worse than the naive baseline ... and the corresponding permutation-test p-value was 0.4706."* --- arXiv:2603.15842, \u00a710.1
 
-The \u00a710.1 attacker is **strictly stronger than us**: they have *paired* `(\u03a8, X)` training data to fit an MLP decoder; we have only `Z`. If the strictly-stronger attacker fails with `p = 0.4706`, our attainable advantage is bounded above by the same number. The Grand Prize is therefore an out-of-reach target for any honest reconstruction attack under the published evaluation protocol.
+The \u00a710.1 attacker is **strictly stronger than the competition setting**: they have *paired* `(\u03a8, X)` training data to fit an MLP decoder; competitors here have only `Z`. If the strictly-stronger attacker reports `p = 0.4706`, our attainable advantage is bounded above by the same number. Full reconstruction is therefore out of reach in expectation for any reconstruction attack respecting the published evaluation protocol.
 
-This is not pessimism --- it is a published theorem and a published empirical result by the same author who is also the competition judge.
+This is not pessimism --- it is a published theorem and a published empirical result that any defensible attack must reckon with.
 """
 
 
@@ -742,7 +742,7 @@ MASTER_S6_SIX_CHANNELS = """\
 
 ## 6. The Six Calibrated Leak Channels
 
-The host's paper \u00a710.2 acknowledges a working leak channel:
+Paper \u00a710.2 documents a working leak channel:
 
 > *"The magnitude-baseline attack likewise succeeded, achieving an accuracy of **0.6573 \u00b1 0.0350**, an advantage of +0.1031 over the majority baseline, and a p-value of **0.0099** ... useful signal was already exposed by simple geometric properties of the latent vectors."*
 
@@ -851,7 +851,7 @@ Conversely, every empirical signature of `Z` is consistent with a **logistic-reg
 | 480-cell signature sweep top match                                                 | `D = 16, LogReg, [0.8, 0.2], 0.5` at W\u2081 = 0.059.                | **Consistent**   |
 | Bank-domain tagline                                                                | "matching a bank's ML prediction API" --- bank classifier.       | **Consistent**   |
 
-We conclude: the *primary submission* should target `D = 16` based on the empirical signature, while the *backup* covers `D = 132` in case the host built a different deployment than the marketing copy suggests. We submit both, per Kaggle's two-final-submission rule.
+We conclude: the *primary submission* should target `D = 16` based on the empirical signature, while the *backup* covers `D = 132` in case the deployment used by the competition is the §10.1 reference one rather than the bank-domain framing of the announcement. We submit both, per Kaggle's two-final-submission rule.
 """
 
 
@@ -878,7 +878,7 @@ We surveyed 27 publicly committed competitor notebooks. Summary of choices and a
 2. **Six-channel calibrated leak stack** combining all of: linear, magnitude, sign, quadratic, rank-quantile, mixture-component. Gowthaman has four of these; nobody combines all six in a bounded-`\u03b1` framework.
 3. **Cram\u00e9r-Rao + Fano-inequality SRMSE floor** with measured `H(X|Z) \u2248 3.05` bits. No other notebook combines both bounds.
 4. **Three-pronged impossibility argument** (topology + Fano + host \u00a710.1 empirics). Udit covers two prongs; merkiraz covers two.
-5. **Local 8-stage emulator** + 100-seed Monte Carlo. Only the host's sample notebook has any in-notebook self-test.
+5. **Local 8-stage emulator** + 100-seed Monte Carlo. Among the public submissions, only the official starter notebook ships an in-notebook self-test.
 6. **Dual `D\u0302` hedge** (`D=16` primary + `D=132` backup).
 7. **Compliance posture**: internet off in metadata, numpy-only imports, no `random` calls, bit-identical determinism across 5 runs.
 8. **Measured calibrated SRMSE envelope** in synthetic surrogates: 100-seed mean 1.00015 with 95 % bootstrap CI `[0.99993, 1.00039]`; statistically indistinguishable from the zeros baseline.
@@ -944,12 +944,12 @@ This section maps every line of the official evaluation rubric and every prize-t
 
 ### 14.2 The 4 Prize Tracks
 
-| Prize                                | Amount   | Where this notebook addresses it                                                                                                                                                              |
-|--------------------------------------|---------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Full Reconstruction (Grand Prize)    | $8,000   | Targeted opportunistically by \u00a76 six-channel attack; \u00a79 100-seed Monte Carlo measures expected gain. \u00a74.3 honestly reports the host's own \u00a710.1 failure on a strictly-stronger attacker.        |
-| Best Attack Strategy & Analysis      | $1,200   | \u00a73 (W\u2081 signature sweep), \u00a74 (three-pronged impossibility), \u00a75 (Cram\u00e9r-Rao + Fano floors), \u00a76 (six-channel calibrated leak stack), \u00a710 (D=132 refutation), \u00a711 (head-to-head with 27 competitors). |
-| Partial Reconstruction               | $600     | \u00a76 six leak channels (linear / magnitude / sign / quadratic / rank-quantile / mixture-component); \u00a79 100-seed Monte Carlo measures the calibrated SRMSE envelope (95 % CI `[0.99993, 1.00039]`). The channels carry the \u00a710.2-documented partial signal; whether it materializes on the actual hidden `X` depends on the unknown column ordering. |
-| Best Technical Write-Up              | $200     | This notebook end-to-end. Claim \u2192 empirical evidence \u2192 primary-source citation. Reference list in \u00a715.                                                                                          |
+| Prize track                          | Where this notebook addresses it                                                                                                                                                              |
+|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full Reconstruction (Grand Prize)    | Targeted opportunistically by \u00a76 six-channel attack; \u00a79 100-seed Monte Carlo measures expected gain. \u00a74.3 reports the published \u00a710.1 result on a strictly-stronger attacker, which bounds any honest gain from above. |
+| Best Attack Strategy & Analysis      | \u00a73 (W\u2081 signature sweep), \u00a74 (three-pronged impossibility), \u00a75 (Cram\u00e9r-Rao + Fano floors), \u00a76 (six-channel calibrated leak stack), \u00a710 (D=132 refutation), \u00a711 (head-to-head with 27 competitors). |
+| Partial Reconstruction               | \u00a76 six leak channels (linear / magnitude / sign / quadratic / rank-quantile / mixture-component); \u00a79 100-seed Monte Carlo measures the calibrated SRMSE envelope (95 % CI `[0.99993, 1.00039]`). The channels carry the \u00a710.2-documented partial signal; whether it materialises on the hidden `X` depends on the unknown column ordering. |
+| Best Technical Write-Up              | This notebook end-to-end. Claim \u2192 empirical evidence \u2192 primary-source citation. Reference list in \u00a715.                                                                                          |
 
 ### 14.3 Mandatory Submission Requirements (Submission Requirements page)
 
@@ -977,13 +977,44 @@ This section maps every line of the official evaluation rubric and every prize-t
 MASTER_S15_CONCLUSION_AND_REFS = """\
 ---
 
-## 15. Conclusion and References
+## 15. Conclusion, Recent-Literature Context, and References
+
+### 15.1 Where this submission sits in the 2024--2026 model-inversion literature
+
+We re-checked the published literature to confirm whether our six-channel attack is at the state of the art for **1-D scalar latent inversion of a class-imbalanced classifier under no paired training data**.
+
+- *Fang et al., **Model Inversion Attacks: A Survey of Approaches and Countermeasures**, [arXiv:2411.10023](https://arxiv.org/abs/2411.10023) (Nov 2024)* --- canonical taxonomy of black-box / label-only / confidence-score attacks. Confirms that for **scalar outputs** the usable channels are (a) the scalar itself, (b) its rank/quantile transform, and (c) auxiliary-prior reconstruction. No structurally new channel class for 1-D inputs since 2023. Our channels 0--5 cover (a) and (b); (c) requires paired training data the competition does not afford.
+- *Liu et al., **Rank Matters: Understanding and Defending Model Inversion via Low-Rank Feature Filtering**, NeurIPS 2024 ([arXiv:2410.05814](https://arxiv.org/abs/2410.05814)).* Proves leakage in MI attacks is dominated by the **top singular direction**; for a 1-D `Z`, that direction is `z` itself, so additional gain has to come from non-monotonic channels --- exactly our channels 1, 3, 5 (magnitude, quadratic, mixture-component).
+- *Stadler, Oprisanu, Troncoso, **A Linear Reconstruction Approach for Attribute Inference Attacks against Synthetic Data**, USENIX Security 2024 ([arXiv:2301.10053](https://arxiv.org/abs/2301.10053)).* The strongest published per-column reconstruction baseline for tabular data with class-imbalanced binary targets. Uses a **ridge-with-prior** per-column `\u03b1_d = Cov(X_d, Z)/(Var(Z) + \u03bb)` instead of a flat scalar. With paired `(X_d, Z)` training data this strictly dominates a flat `\u03b1` (James--Stein theorem for `D \u2265 3`); without paired data the per-column `\u03b1_d` cannot be estimated and a calibrated flat `\u03b1` is the best one can do --- which is what we ship.
+
+**Verdict.** We are at the state of the art for the *no-paired-training-data* threat model. The published improvements (per-column ridge \u03b1, copula-conditional channel, hard-MAP mixture) require paired `(X, Z)` examples, which the competition rules forbid. Reporting `\u22120.0003` reconstruction advantage under a strictly-stronger attacker (paper \u00a710.1) confirms that the paired-data axis is itself bounded above; our no-paired-data attack inherits the same bound.
+
+**What we did not adopt and why.**
+- *Per-column ridge `\u03b1_d`*: would need paired `(X_d, Z)` for each surrogate column to fit. Estimating it on uniformly-random `make_classification` surrogates and then deploying on the hidden `X` risks a surrogate-vs-real mismatch that would inflate variance.
+- *Copula-conditional channel `\u03a6\u207b\u00b9(\u03c1_d \u00b7 \u03a6(z_std))`*: same issue; depends on a per-column `\u03c1_d` we cannot estimate without paired training data.
+- *Hard-MAP mixture component*: a strict refinement of our soft posterior (channel 5); adds redundancy for separated mixtures but no new signal for overlapping ones.
+- *Float-32 mantissa channel*: the supplied `intercepted_data.csv` stores values at full float-64 precision (52 mantissa bits saturated --- see EDA \u00a72), so there is no quantization residual to exploit.
+
+### 15.2 Conclusion
+
+We deliver, in priority order:
+1. An eight-test forensic identification of the encoder family (skew-normal log-odds of a binary classifier with imbalanced labels, `D\u0302 = 16`).
+2. A reconciliation with the published \u00a710.1 deployment (`D = 132`, real-estate regressor): different head, different dataset, same encoder family.
+3. A `reconstruct()` whose SRMSE drift from the all-zeros baseline is bounded analytically by **\u00b10.3 % under realistic `r`** for `D = 16` and **\u00b10.14 %** for `D = 132`, with 100-seed Monte Carlo measuring **mean SRMSE 1.00015**, 95 % bootstrap CI `[0.99993, 1.00039]` --- statistically indistinguishable from the all-zeros baseline.
+4. A local 8-stage validation harness so reviewers can verify each compliance claim.
+5. A second submission as a `D\u0302 = 132` hedge.
+6. A three-pronged impossibility argument (topology + Fano + published \u00a710.1 empirics).
+7. An explicit head-to-head with the strongest 27 public submissions, an explicit rubric-mapped walkthrough (\u00a714), and a positioning within the recent literature (\u00a715.1).
+
+What we do not deliver:
+- A guaranteed winning SRMSE for the Grand Prize. The published \u00a710.1 result reports `\u22120.0003` reconstruction advantage under a strictly stronger attacker, and that result bounds ours from above.
+- A magic decoder. The information is gone in the strong sense under the published evaluation protocol; recovering it would falsify the impossibility theorems in \u00a79.
 
 ### Conclusion
 
 We deliver, in priority order:
 1. An eight-test forensic identification of the encoder family (skew-normal log-odds of a binary classifier with imbalanced labels, `D\u0302 = 16`).
-2. A reconciliation with the host's own published deployment (`D = 132`, real-estate regressor): different head, different dataset, same encoder family.
+2. A reconciliation with the published \u00a710.1 deployment (`D = 132`, real-estate regressor): different head, different dataset, same encoder family.
 3. A `reconstruct()` whose SRMSE drift from the all-zeros baseline is bounded analytically by **\u00b10.3 % under realistic `r`** for `D = 16` and **\u00b10.14 %** for `D = 132`, with 100-seed Monte Carlo measuring **mean SRMSE 1.00015**, 95 % bootstrap CI `[0.99993, 1.00039]` --- statistically indistinguishable from the all-zeros baseline.
 4. A local 8-stage validation harness so reviewers can verify each compliance claim.
 5. A second submission as a `D\u0302 = 132` hedge.
@@ -991,18 +1022,21 @@ We deliver, in priority order:
 7. An explicit head-to-head with the strongest 27 public submissions and an explicit rubric-mapped walkthrough (\u00a714).
 
 What we do not deliver:
-- A guaranteed winning SRMSE for the Grand Prize. The host's own \u00a710.1 reports `\u22120.0003` reconstruction advantage under a strictly stronger attacker, and that result bounds ours from above.
-- A magic decoder. The information is gone in the strong sense; recovering it would falsify the published impossibility theorems.
+- A guaranteed winning SRMSE for the Grand Prize. The published \u00a710.1 result reports `\u22120.0003` reconstruction advantage under a strictly stronger attacker, and that result bounds ours from above.
+- A magic decoder. The information is gone in the strong sense under the published evaluation protocol; recovering it would falsify the impossibility theorems in \u00a79.
 
-### References
+### 15.3 References
 
-1. Samuelson, J. J. *Informationally Compressive Anonymization: Non-Degrading Sensitive Input Protection for Privacy-Preserving Supervised Machine Learning.* arXiv:2603.15842, 2026.
-2. Cover & Thomas, *Elements of Information Theory*, 2nd ed., Wiley 2006 (\u00a72 entropy, \u00a710 rate-distortion, \u00a711 Fano's inequality).
-3. Zhu, Liu, Han, *Deep Leakage from Gradients*, NeurIPS 2019.
-4. Carlini et al., *Extracting Training Data from Large Language Models*, USENIX Security 2021.
-5. Tishby, Pereira, Bialek, *The Information Bottleneck Method*, 1999.
-6. Fredrikson, Jha, Ristenpart, *Model Inversion Attacks*, ACM CCS 2015.
-7. Acklam, P. *An Algorithm for Computing the Inverse Normal Cumulative Distribution Function*, 2003.
+1. Samuelson, J. J. *Informationally Compressive Anonymization: Non-Degrading Sensitive Input Protection for Privacy-Preserving Supervised Machine Learning.* [arXiv:2603.15842](https://arxiv.org/abs/2603.15842), 2026. *(The reference paper for the VEIL encoder and its impossibility theorems.)*
+2. Fang, G. et al. *Model Inversion Attacks: A Survey of Approaches and Countermeasures.* [arXiv:2411.10023](https://arxiv.org/abs/2411.10023), 2024. *(Canonical 2024 taxonomy of MI attacks; confirms our scalar-channel coverage.)*
+3. Liu, X. et al. *Rank Matters: Understanding and Defending Model Inversion via Low-Rank Feature Filtering.* NeurIPS 2024, [arXiv:2410.05814](https://arxiv.org/abs/2410.05814). *(Top-singular-direction leakage proof; motivates our non-monotonic channels.)*
+4. Stadler, T., Oprisanu, B., Troncoso, C. *A Linear Reconstruction Approach for Attribute Inference Attacks against Synthetic Data.* USENIX Security 2024, [arXiv:2301.10053](https://arxiv.org/abs/2301.10053). *(Per-column ridge baseline; the closest published analogue to our \u03b1 calibration with paired data.)*
+5. Cover & Thomas, *Elements of Information Theory*, 2nd ed., Wiley 2006 (\u00a72 entropy, \u00a710 rate-distortion, \u00a711 Fano's inequality).
+6. Zhu, Liu, Han, *Deep Leakage from Gradients*, NeurIPS 2019.
+7. Carlini et al., *Extracting Training Data from Large Language Models*, USENIX Security 2021.
+8. Tishby, Pereira, Bialek, *The Information Bottleneck Method*, 1999.
+9. Fredrikson, Jha, Ristenpart, *Model Inversion Attacks*, ACM CCS 2015.
+10. Acklam, P. *An Algorithm for Computing the Inverse Normal Cumulative Distribution Function*, 2003.
 """
 
 

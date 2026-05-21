@@ -27,9 +27,9 @@ The competition asks us to implement `reconstruct(public_latents, hidden_latents
 We approach it as a **statistical-cryptanalysis** problem:
 
 1. **Encoder identification.** Catalog the marginal, mixture, autocorrelation, duplicate, and shape statistics of the intercepted batch; sweep 480 synthetic encoder configurations and pick the one whose decision-function marginal best matches `Z` under the 1-Wasserstein metric.
-2. **Impossibility analysis.** Combine the host's published topology theorems (paper §9), Fano's inequality applied to the measured row entropy of `Z` (~3.05 bits), and the host's own §10.1 empirical failure on a strictly-stronger attacker.
+2. **Impossibility analysis.** Combine the published topology theorems (paper §9), Fano's inequality applied to the measured row entropy of `Z` (~3.05 bits), and the §10.1 empirical result on a strictly-stronger attacker.
 3. **Leak-channel attack.** Operationalise the paper §10.2-documented magnitude leak as a six-channel bounded-α reconstruction stack (linear, magnitude, sign, quadratic, rank-quantile, mixture-component) with `α = 0.045` per channel in cols 0..5 and per-feature zero-baseline in cols 6..15.
-4. **Calibrated risk envelope.** A 100-seed Monte Carlo on synthetic surrogates yields mean SRMSE `1.00015`, 95 % bootstrap CI `[0.99993, 1.00039]` — statistically indistinguishable from the all-zeros baseline at the 5 % level, consistent with the host's own §10.1 result.
+4. **Calibrated risk envelope.** A 100-seed Monte Carlo on synthetic surrogates yields mean SRMSE `1.00015`, 95 % bootstrap CI `[0.99993, 1.00039]` — statistically indistinguishable from the all-zeros baseline at the 5 % level, consistent with the published §10.1 result.
 5. **Self-emulation.** Run all 8 evaluation stages locally to confirm compliance before submitting.
 
 ---
@@ -50,7 +50,7 @@ $$
 
 The surrogate decoder reports a measured per-row mutual information ceiling of `I(X;Z) ≈ log₂(N) ≈ 12.0` bits (rank-based oracle bound for `N = 4096`). Substituting yields a Fano floor of `SRMSE ≳ 0.984` for `D = 16`, leaving a maximum 1.6 % improvement window before any practical channel loss.
 
-### Prong 3 — The host's own §10.1 empirical result
+### Prong 3 — The published §10.1 empirical result
 
 > *"The reported overall reconstruction advantage relative to the baseline was −0.0003 ... permutation-test p-value 0.4706."* — paper §10.1
 
@@ -122,7 +122,7 @@ vs.
 
 ## What this submission is *not*
 
-- A guaranteed Grand-Prize winner. The host's own §10.1 reports `−0.0003` reconstruction advantage with `p = 0.4706` under a strictly-stronger attacker than the competition affords, and that result bounds ours from above.
+- A guaranteed Grand-Prize winner. The published §10.1 result reports `−0.0003` reconstruction advantage with `p = 0.4706` under a strictly-stronger attacker than the competition affords, and that result bounds ours from above.
 - A magic decoder. The published impossibility theorems (paper §9) rule out invertibility on any open region.
 
 ## What this submission *is*
@@ -149,12 +149,25 @@ python src/self_tests.py    # runs all 8 stages locally; expected: STAGE1..STAGE
 jupyter nbconvert --to notebook --execute notebook/pierce-the-veil-master.ipynb
 ```
 
+## Where this submission sits in the 2024–2026 literature
+
+We re-checked the published literature to confirm whether the six-channel attack is at the state of the art for **1-D scalar latent inversion of a class-imbalanced classifier under no paired training data**.
+
+- *Fang et al. (2024), [arXiv:2411.10023](https://arxiv.org/abs/2411.10023)* — canonical survey of model-inversion attacks. Confirms that for scalar outputs the usable channels are (a) the scalar itself, (b) its rank/quantile transform, and (c) auxiliary-prior reconstruction. Our channels 0–5 cover (a) and (b); (c) requires paired training data the competition does not afford.
+- *Liu et al., **Rank Matters**, NeurIPS 2024, [arXiv:2410.05814](https://arxiv.org/abs/2410.05814)* — proves leakage in MI attacks is dominated by the top singular direction; for a 1-D `Z` that direction is `z`, so additional gain must come from non-monotonic channels (our channels 1, 3, 5).
+- *Stadler et al., USENIX Security 2024, [arXiv:2301.10053](https://arxiv.org/abs/2301.10053)* — strongest published per-column baseline for tabular reconstruction; uses a ridge-with-prior per-column `α_d` instead of a flat scalar. Strictly dominates a flat `α` *if paired training data is available*; in our setting it is not.
+
+Verdict: our six-channel stack is at the state of the art for the *no-paired-training-data* threat model. The published improvements (per-column ridge `α`, copula-conditional channel, hard-MAP mixture) all require paired `(X, Z)` examples, which the competition rules forbid.
+
 ## References
 
-1. Samuelson, J. J. *Informationally Compressive Anonymization: Non-Degrading Sensitive Input Protection for Privacy-Preserving Supervised Machine Learning.* arXiv:2603.15842, 2026.
-2. Cover & Thomas, *Elements of Information Theory*, 2nd ed., Wiley 2006.
-3. Zhu, Liu, Han, *Deep Leakage from Gradients*, NeurIPS 2019.
-4. Carlini et al., *Extracting Training Data from Large Language Models*, USENIX Security 2021.
-5. Tishby, Pereira, Bialek, *The Information Bottleneck Method*, 1999.
-6. Fredrikson, Jha, Ristenpart, *Model Inversion Attacks*, ACM CCS 2015.
-7. Acklam, P. *An Algorithm for Computing the Inverse Normal Cumulative Distribution Function*, 2003.
+1. Samuelson, J. J. *Informationally Compressive Anonymization: Non-Degrading Sensitive Input Protection for Privacy-Preserving Supervised Machine Learning.* [arXiv:2603.15842](https://arxiv.org/abs/2603.15842), 2026.
+2. Fang, G. et al. *Model Inversion Attacks: A Survey of Approaches and Countermeasures.* [arXiv:2411.10023](https://arxiv.org/abs/2411.10023), 2024.
+3. Liu, X. et al. *Rank Matters: Understanding and Defending Model Inversion via Low-Rank Feature Filtering.* NeurIPS 2024, [arXiv:2410.05814](https://arxiv.org/abs/2410.05814).
+4. Stadler, T., Oprisanu, B., Troncoso, C. *A Linear Reconstruction Approach for Attribute Inference Attacks against Synthetic Data.* USENIX Security 2024, [arXiv:2301.10053](https://arxiv.org/abs/2301.10053).
+5. Cover & Thomas, *Elements of Information Theory*, 2nd ed., Wiley 2006.
+6. Zhu, Liu, Han, *Deep Leakage from Gradients*, NeurIPS 2019.
+7. Carlini et al., *Extracting Training Data from Large Language Models*, USENIX Security 2021.
+8. Tishby, Pereira, Bialek, *The Information Bottleneck Method*, 1999.
+9. Fredrikson, Jha, Ristenpart, *Model Inversion Attacks*, ACM CCS 2015.
+10. Acklam, P. *An Algorithm for Computing the Inverse Normal Cumulative Distribution Function*, 2003.

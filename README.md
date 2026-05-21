@@ -22,8 +22,9 @@ We treat the competition as statistical cryptanalysis on the
 host. The paper proves (§9) and empirically demonstrates (§10.1) that
 the encoder is non-invertible even when the attacker has *paired*
 training data — which competition participants do not. We focus on the
-three juried tracks ($2,000 combined) through a forensic
-encoder-identification analysis, a Cramér-Rao + Fano-inequality SRMSE
+three juried tracks (Attack Strategy & Analysis, Partial Reconstruction,
+Best Write-Up) through a forensic encoder-identification analysis, a
+Cramér-Rao + Fano-inequality SRMSE
 floor derivation, and a `reconstruct()` that implements **six
 calibrated leak channels** (linear, magnitude, sign, quadratic,
 rank-Gaussian quantile, GMM mixture-component) at `α = 0.045` per
@@ -32,7 +33,7 @@ zeros baseline (and empirically tighter — see Monte Carlo below).
 A 100-seed Monte Carlo on synthetic surrogates gives mean SRMSE
 `1.00015`, 95 % bootstrap CI `[0.99993, 1.00039]` — statistically
 indistinguishable from the zeros baseline, which is consistent with
-the host's own §10.1 result on a strictly-stronger attacker. We also
+the published §10.1 result on a strictly-stronger attacker. We also
 ship two notebooks (`D̂ = 16` primary, `D̂ = 132` backup) to hedge
 the unknown true dimensionality.
 
@@ -117,8 +118,8 @@ the field that the rest does not jointly cover:
    no other notebook combines all six.
 3. **Cramér-Rao + Fano-inequality SRMSE floor** with measured `H(X|Z)
    ≈ 3.05` bits. No other notebook combines both floors.
-4. **Three-pronged impossibility argument** (topology + Fano + host's
-   own §10.1 empirics). Udit covers two prongs; merkiraz covers two.
+4. **Three-pronged impossibility argument** (topology + Fano + the
+   published §10.1 empirics). Udit covers two prongs; merkiraz covers two.
 5. **Local 8-stage emulator** and 100-seed Monte Carlo characterisation
    of the SRMSE distribution.
 6. **Dual `D̂` hedge** (`D = 16` primary + `D = 132` backup) as Final

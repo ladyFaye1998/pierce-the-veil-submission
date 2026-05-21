@@ -4,16 +4,16 @@ Pierce the VEIL --- final reconstruction algorithm.
 Author: Lady Faye  (Kaggle: ladyfaye)
 License: MIT
 Tracks targeted:
-    Best Strategy & Analysis ($1,200)
-    Partial Reconstruction    ($600)
-    Best Write-Up             ($200)
-    Grand Prize               ($8,000) --- attempted under documented constraints
+    Best Attack Strategy & Analysis
+    Partial Reconstruction
+    Best Technical Write-Up
+    Full Reconstruction Grand Prize -- attempted under documented constraints
 
 Summary
 =======
 The competition gives only intercepted scalars Z in R^(N x 1) --- no paired
-(Z, X) examples are ever exposed. The host's own paper (arXiv:2603.15842,
-Samuelson) proves the encoder is non-invertible (sec. 9, topological) AND
+(Z, X) examples are ever exposed. The reference paper (arXiv:2603.15842,
+Samuelson 2026) proves the encoder is non-invertible (sec. 9, topological) AND
 demonstrates empirically (sec. 10.1) that even a strictly stronger
 attacker --- given paired (latent, raw) training pairs --- achieves a
 reconstruction advantage of -0.0003 with p = 0.4706. The Grand Prize is

@@ -1,114 +1,116 @@
 # Pierce the VEIL — Submission Guide
 
-This is the end-to-end recipe for getting our two Final Submissions onto
+This is the end-to-end recipe for getting the two Final Submissions onto
 Kaggle and confirming they pass evaluation.
 
 ## Deadline
 
-**2026-05-22 04:00:00 UTC** (~Friday morning). Submit by Thursday evening
-to leave buffer for re-runs.
+**2026-05-22 04:00:00 UTC**. Submit by Thursday evening to leave buffer
+for re-runs.
 
-## Our final submissions (we ship both — Kaggle allows up to 2)
+## The two Final Submissions (Kaggle allows up to 2)
 
-| File                                              | `D̂`  | Strategy                                            | Worst-case SRMSE drift |
-|---------------------------------------------------|------|-----------------------------------------------------|------------------------|
-| `notebook/pierce-the-veil-master.ipynb`           | 16   | Linear + magnitude in cols 0,1; zeros in cols 2..15 | ±0.5 %                |
-| `notebook/pierce-the-veil-backup-d132.ipynb`      | 132  | Same allocation; zeros in cols 2..131 (paper §10.1) | ±0.1 %                |
+| File                                              | `D̂`  | Strategy                                                                       | Analytic worst-case SRMSE drift |
+|---------------------------------------------------|------|---------------------------------------------------------------------------------|--------------------------------|
+| `notebook/pierce-the-veil-master.ipynb`           | 16   | 6 calibrated leak channels in cols 0..5 (`α = 0.045`); zeros in cols 6..15      | ±1.7 %                         |
+| `notebook/pierce-the-veil-backup-d132.ipynb`      | 132  | Same 6 channels in cols 0..5 (`α = 0.05`); zeros in cols 6..131                  | ±0.14 % / −0.23 %              |
+
+The six channels are: linear `z_std`, magnitude `|z_std| − E|z_std|`,
+sign `sign(z − median)`, quadratic `(z_std² − 1)/√2`, rank-Gaussian
+quantile `Φ⁻¹(rank/(N+1))`, and GMM mixture-component posterior
+`2·P(C₁|z) − 1`. See §6 of `notebook/pierce-the-veil-master.ipynb` for
+the full math.
 
 Both share:
 * `reconstruct(public_latents, hidden_latents, metadata=None)` signature
 * Imports only `numpy`
-* Deterministic (no `random`, no `seed`, no I/O)
+* Deterministic (no `random`, no `seed`, no I/O; bit-identical across 5 runs)
 * Permutation equivariant (`f(PZ) = P f(Z)` exactly)
-* Per-row finite output, fully sanitised
+* Per-row finite output, defensively sanitised
 
-## Step-by-step upload
+## Live kernels (already uploaded)
 
-1. **Verify locally:**
-   ```powershell
-   python src\self_tests.py             # primary (D=16)
-   python src\make_figures.py           # regenerate figures (optional)
-   ```
-   All eight stages must print pass-equivalent values; see
-   `notebook/pierce-the-veil-master.executed.ipynb` for reference numbers.
+| Kernel | URL |
+|---|---|
+| Primary `D̂ = 16` | <https://www.kaggle.com/code/ladyfaye/pierce-the-veil-master-submission-d16> |
+| Backup `D̂ = 132` | <https://www.kaggle.com/code/ladyfaye/pierce-the-veil-backup-submission-d132> |
 
-2. **Open Kaggle:**
-   - https://www.kaggle.com/competitions/pierce-the-veil
-   - Click **Code → New Notebook**
+Both have `KernelWorkerStatus.COMPLETE`. Verify with:
 
-3. **Paste `pierce-the-veil-master.ipynb`:**
-   - In the Kaggle notebook, *File → Upload Notebook* → select
-     `notebook/pierce-the-veil-master.ipynb`.
-   - Add the competition dataset as input
-     (`Add Data → Competition Data`).
-   - In the right-hand panel, set **Internet OFF**, **GPU OFF**.
-   - Click **Save & Run All (Commit)**.
-   - Once committed, click **Submit to Competition** on the committed
-     version. Save the version number.
+```powershell
+kaggle kernels status ladyfaye/pierce-the-veil-master-submission-d16
+kaggle kernels status ladyfaye/pierce-the-veil-backup-submission-d132
+```
 
-4. **Repeat for `pierce-the-veil-backup-d132.ipynb`** as a separate
-   notebook (do not put both in the same notebook; the scorer imports a
-   single `reconstruct`).
+## Re-pushing after changes (only if needed)
 
-5. **Select Final Submissions:**
-   - Go to *My Submissions* and pick both committed notebooks as your
-     two Final Submissions (Kaggle's two-final-submission rule).
+```powershell
+$env:PYTHONIOENCODING="utf-8"; $env:PYTHONUTF8="1"
+python src\build_notebooks.py
+jupyter nbconvert --to notebook --execute notebook\pierce-the-veil-master.ipynb --output pierce-the-veil-master.executed.ipynb --ExecutePreprocessor.timeout=240
+jupyter nbconvert --to notebook --execute notebook\pierce-the-veil-backup-d132.ipynb --output pierce-the-veil-backup-d132.executed.ipynb --ExecutePreprocessor.timeout=90
+cp notebook\pierce-the-veil-master.ipynb kaggle_push\primary\
+cp notebook\pierce-the-veil-backup-d132.ipynb kaggle_push\backup\
+kaggle kernels push -p kaggle_push\primary
+kaggle kernels push -p kaggle_push\backup
+```
+
+## Final-Submission selection (user-action-only, on Kaggle web UI)
+
+Kaggle's "Submit" flow requires a manual click:
+
+1. Go to <https://www.kaggle.com/competitions/pierce-the-veil/submissions>.
+2. Click **Submit Prediction** (or **Select Submission**).
+3. Pick **both** committed kernels as the two Final Submissions.
+4. Confirm.
+
+Without this step the kernels exist on Kaggle but are **not entered**.
+
+## Tracks targeted (in priority order)
+
+1. **Best Attack Strategy & Analysis** — the forensic writeup in
+   `pierce-the-veil-master.ipynb`: 480-cell W₁ encoder sweep, three-pronged
+   impossibility argument, Cramér-Rao + Fano floors, six-channel
+   calibrated leak stack, D=132 refutation, head-to-head with 27 public
+   competitor notebooks.
+2. **Best Technical Write-Up** — same notebook, double-purposed: every
+   claim tied to either an in-notebook computation or a primary-source
+   citation; rubric-mapped walkthrough in §14; standalone
+   `WRITEUP.md` mirrors the argument for judges who prefer markdown.
+3. **Partial Reconstruction** — the six calibrated channels operationalise
+   the paper §10.2 magnitude leak; 100-seed Monte Carlo (mean SRMSE
+   `1.00015`, 95 % bootstrap CI `[0.99993, 1.00039]`) characterises the
+   risk envelope.
+4. **Full Reconstruction Grand Prize** — attempted opportunistically; the
+   published §10.1 result reports `−0.0003` reconstruction advantage with
+   `p = 0.4706` under a strictly stronger attacker than this competition
+   affords, which bounds any honest attempt from above. We say so directly
+   in §4.3.
 
 ## What we are not doing (and why)
 
-- **No Grand Prize attempt.** The host's own paper (arXiv:2603.15842
-  §10.1) reports that even a stronger-than-deployment attacker, given
-  paired `(Ψ, X)` examples, fails to reconstruct (advantage = −0.0003,
-  p = 0.4706). We have less information than that attacker; we cannot
-  win the $8,000 Grand Prize and we do not pretend otherwise.
-
 - **No internet, no external data, no platform tricks.** Strictly
-  numpy + a public scalar dataset.
-
+  `numpy` + the supplied `intercepted_data.csv`.
 - **No ensembling, no neural decoder, no Optuna tuning.** Every extra
-  parameter is one more way to overfit to the public batch and
-  catastrophically fail Stage 7 (generalisation).
+  hyperparameter is one more way to overfit to the public batch and
+  fail Stage 7 (generalisation).
 
-## What we are doing (in priority order)
-
-1. **Attack Strategy & Analysis ($1,200)** — the comprehensive forensic
-   writeup in the master notebook, identifying the encoder family,
-   estimating `D̂`, reconciling with the paper's published deployment,
-   and quantifying the information-theoretic floor.
-
-2. **Best Technical Write-Up ($200)** — same notebook, double-purposed:
-   carefully sourced, fully reproducible, every claim tied to either an
-   in-notebook computation or a paper citation.
-
-3. **Partial Reconstruction ($600)** — the calibrated `α = 0.08` signal
-   allocation across the linear and magnitude channels (per paper §10.2)
-   is a *bona fide* partial recovery operationalisation, and it is
-   precisely the strategy the paper documents as "useful signal already
-   exposed by simple geometric properties".
-
-4. **Full Reconstruction Grand Prize ($8,000)** — opportunistically: if
-   the true `D` happens to be 16 (primary) or 132 (backup), and if the
-   chosen 2 columns happen to align with high-correlation features, we
-   may marginally beat Stage 4 baselines. The expected value of this
-   is small; we maximise it by keeping the per-column allocation small
-   enough that we never *fail* Stage 4 either.
-
-## Compliance checklist (must be re-verified before submitting)
+## Compliance checklist (re-verified at every build)
 
 - [x] `reconstruct(public_latents, hidden_latents, metadata=None)` defined
 - [x] Output is `np.ndarray` of shape `(N_hid, D_HAT)`
 - [x] Output is float64, all finite
-- [x] Internet disabled in notebook settings
-- [x] Imports only `numpy` (and `pandas` for I/O at scoring scaffolding)
-- [x] No `random`, no `seed`, no `time`-dependent behaviour
+- [x] Internet disabled in kernel metadata
+- [x] Imports only `numpy` (and `pandas` for the wrapper-cell `submission.csv` write)
+- [x] No `random`, no `seed`, no time-dependent behaviour
 - [x] Five back-to-back runs produce bit-identical output
-- [x] `f(PZ) = P f(Z)` exactly (atol = 1e-12)
-- [x] Notebook runs end-to-end on a Kaggle CPU kernel in < 1 minute
+- [x] `f(PZ) = P f(Z)` exactly (`atol = 1e-12`)
+- [x] Notebook runs end-to-end on a Kaggle CPU kernel in < 30 s (master) / < 5 s (backup)
 
 ## What if neither `D̂` is correct?
 
-Both notebooks still target the three secondary tracks via the writeup.
-The Strategy & Analysis and Best Write-Up tracks are judged on quality
-of analysis, not specific SRMSE values. Even with `D̂` wrong (=> Stage 2
-DQ for Grand Prize purposes), the secondary tracks remain in play
-because they are juried, not metric-gated.
+Both notebooks still target the three juried tracks (Attack Strategy &
+Analysis, Best Write-Up, Partial Reconstruction) via the writeup. Those
+tracks are judged on quality of analysis, not specific SRMSE values.
+Even if `D̂` is wrong for both submissions (and the Grand Prize is
+out of reach regardless per §4.3), the juried tracks remain in play.
